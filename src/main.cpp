@@ -30,10 +30,10 @@ using ceres::Solve;
 //};
 
 int main(int argc, char** argv) {
-    Point<double> receiver;
+    Point<double> target;
 
     double std_dev = 1.0;
-    vector< Point<double> > satellites;
+    vector< Point<double> > beacon;
 
 
     // Parse arguments
@@ -44,40 +44,42 @@ int main(int argc, char** argv) {
 
             std_dev = atof(argv[++i]);
 
-        } else if ((strcmp (argv[i], "--satellite") == 0) || (strcmp (argv[i], "-s") == 0)){
+        } else if ((strcmp (argv[i], "--beacon") == 0) || (strcmp (argv[i], "-b") == 0)){
 
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
 
-            satellites.push_back(Point<double>(x, y));
-        } else if ((strcmp (argv[i], "--receiver") == 0) || (strcmp (argv[i], "-r") == 0)){
+            beacon.push_back(Point<double>(x, y));
+        } else if ((strcmp (argv[i], "--target") == 0) || (strcmp (argv[i], "-t") == 0)){
 
-           receiver.setX( atof(argv[++i]) );
-           receiver.setY( atof(argv[++i]) );
+           target.setX( atof(argv[++i]) );
+           target.setY( atof(argv[++i]) );
 
 
             valid_input = true;
         }
     }
 
+    //TODO controllo numero di beacon
+
     if( !valid_input ){
         cout << "Input is not valid\n";
-        cout << "Set the position of the receiver with '-r x y' and at least 3 satellites with '-s x y'\n";
+        cout << "Set the position of the target with '-t x y' and at least 3 beacons with '-b x y'\n";
         return -1;
     }
 
     cout << "Standard deviation = " << std_dev << endl;
-    cout << "Receiver is in (" <<  receiver.getX() << ", "  << receiver.getY() << ")\n";
+    cout << "Target is in (" <<  target.getX() << ", "  << target.getY() << ")\n";
 
 
-    vector< double > measures; // distance between receiver and satellite + gaussian noise
+    vector< double > measures; // distance between target and beacon + gaussian noise
 
     default_random_engine generator(time(NULL));
     normal_distribution<double> distribution(0, std_dev);
 
 
-    for (int i=0; i<satellites.size(); ++i){
-        double dist = receiver.distanceTo(satellites[i]);
+    for (int i=0; i<beacon.size(); ++i){
+        double dist = target.distanceTo(beacon[i]);
 
 
         double noise = distribution(generator);
@@ -86,8 +88,8 @@ int main(int argc, char** argv) {
 
 
 
-        cout << "Satellite " << i << ": (" << satellites[i].getX() << ", "
-             << satellites[i].getY() << ")\t | distance: " << dist << "\t--> " << dist + noise
+        cout << "Beacon " << i << ": (" << beacon[i].getX() << ", "
+             << beacon[i].getY() << ")\t | distance: " << dist << "\t--> " << dist + noise
              << "\tnoise=" << noise << endl;
     }
     cout << endl;
