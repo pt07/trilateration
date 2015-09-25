@@ -108,8 +108,7 @@ int main(int argc, char** argv) {
     }
 
     cout << "Standard deviation = " << std_dev << endl;
-    cout << "Target is in (" <<  target.getX() << ", "  << target.getY() << ")\n";
-
+    cout << "Target is in " <<  target.toString() << endl;
 
     vector< double > measures; // distance between target and beacon + gaussian noise
 
@@ -123,9 +122,8 @@ int main(int argc, char** argv) {
 
         measures.push_back(dist + noise);
 
-        cout << "Beacon " << i << ": (" << beacon[i].getX() << ", "
-             << beacon[i].getY() << ")\t | distance: " << dist << "\t--> " << dist + noise
-             << "\tnoise=" << noise << endl;
+        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t | distance: " << dist
+             << "\t--> " << dist + noise << "\tnoise=" << noise << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
 
@@ -150,20 +148,20 @@ int main(int argc, char** argv) {
                     new MyCostFunctor(beacon[i].getX(), beacon[i].getY(), measures[i]));
 
         problem.AddResidualBlock(cost_f, NULL, &x, &y);
-      }
-      Solver::Options options;
-      options.max_num_iterations = 25;
-      options.linear_solver_type = ceres::DENSE_QR;
-      options.minimizer_progress_to_stdout = true;
-      Solver::Summary summary;
-      Solve(options, &problem, &summary);
-      std::cout << summary.BriefReport() << "\n";
-      std::cout << "Initial x: " << 0.0 << " y: " << 0.0 << "\n";
-      std::cout << "Final   x: " << x << " y: " << y << "\n";
+    }
+    Solver::Options options;
+    options.max_num_iterations = 25;
+    options.linear_solver_type = ceres::DENSE_QR;
+    options.minimizer_progress_to_stdout = true;
+    Solver::Summary summary;
+    Solve(options, &problem, &summary);
+    std::cout << summary.BriefReport() << "\n";
+    std::cout << "Initial x: " << 0.0 << " y: " << 0.0 << "\n";
+    std::cout << "Final   x: " << x << " y: " << y << "\n";
 
-      cout << "The estimated position is far " << target.distanceTo(Point<double>(x, y)) << " from the real position\n";
+    cout << "The estimated position is far " << target.distanceTo(Point<double>(x, y)) << " from the real position\n";
 
 
-      return 0;
+    return 0;
 
 }
