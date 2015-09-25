@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(GpsSimulation)
+project(2DTrilateration)
 
 find_package(Ceres REQUIRED)
 include_directories(${CERES_INCLUDE_DIRS})
@@ -28,5 +28,5 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 add_library(Point src/Point.cpp)
 
 # main
-add_executable(main src/main.cpp)
-target_link_libraries(main ${CERES_LIBRARIES} Point)
+add_executable(trilaterate src/trilaterate.cpp)
+target_link_libraries(trilaterate ${CERES_LIBRARIES} Point)
