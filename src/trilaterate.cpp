@@ -27,50 +27,45 @@ using ceres::Solver;
 using ceres::Solve;
 
 
-//TODO provare a fare la classe
-
+//TODO
+//TODO  come faccio a usare il template qui dentro?
+//TODO  nel senso, tenere le variabili private T e non double
 //template <class T>
-//class MyCostFunctor {
+class MyCostFunctor
+{
+    public:
 
-//    public:
-//        //default constructor
-//        MyCostFunctor(): beacon(Point<T>()), measure(T()) {}
+        MyCostFunctor(double xi_, double yi_, double mi_)
+            : xi(xi_), yi(yi_), mi(mi_) {}
 
-//        MyCostFunctor(Point<T> beacon_, T measure_): beacon(beacon_), measure(measure_) {}
-
-//        void init (const Point<T> beacon_, const T measure_){
-//            beacon = beacon_;
-//            measure = measure_;
-//        }
-
-//        bool operator()(const T* const x , T* residual) const {
-//            residual[0] = sqrt( pow(x[0]-beacon.getX(), 2) + pow(x[1]-beacon.getY(), 2)) - measure;
-//            return true;
-//        }
-
-//    private:
-//        Point<T> beacon;
-//        T measure;
-
-//};
-
-
-struct MeasurementResidual {
-
-    MeasurementResidual(double xi_, double yi_, double mi_)
-        : xi(xi_), yi(yi_), mi(mi_) {}
-
-    template <typename T>
-    bool operator()(const T* const x, const T* const y, T* residual) const {
-        residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
-        return true;
-    }
+        template <typename T>
+        bool operator()(const T* const x, const T* const y, T* residual) const {
+            residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
+            return true;
+        }
 
     private:
         const double xi;
         const double yi;
         const double mi;
 };
+
+//struct MeasurementResidual {
+
+//    MeasurementResidual(double xi_, double yi_, double mi_)
+//        : xi(xi_), yi(yi_), mi(mi_) {}
+
+//    template <typename T>
+//    bool operator()(const T* const x, const T* const y, T* residual) const {
+//        residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
+//        return true;
+//    }
+
+//    private:
+//        const double xi;
+//        const double yi;
+//        const double mi;
+//};
 
 
 
@@ -102,15 +97,13 @@ int main(int argc, char** argv) {
            target.setY( atof(argv[++i]) );
 
 
-            valid_input = true;
+           valid_input = true;
         }
     }
 
-    //TODO controllo numero di beacons inseriti (minimo 3?)
-
-    if( !valid_input ){
+    if( !valid_input || beacon.size()<2){
         cout << "Input is not valid\n";
-        cout << "Set the position of the target with '-t x y' and at least 3 beacons with '-b x y'\n";
+        cout << "Set the position of the target with '-t x y' and at least 2 beacons with '-b x y'\n";
         return -1;
     }
 
@@ -153,11 +146,10 @@ int main(int argc, char** argv) {
 
 
     for (int i = 0; i < beacon.size(); ++i) {
-        problem.AddResidualBlock(
-            new AutoDiffCostFunction<MeasurementResidual, 1, 1, 1>(
-                new MeasurementResidual(beacon[i].getX(), beacon[i].getY(), measures[i])),
-            NULL,
-            &x, &y);
+        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 1, 1>(
+                    new MyCostFunctor(beacon[i].getX(), beacon[i].getY(), measures[i]));
+
+        problem.AddResidualBlock(cost_f, NULL, &x, &y);
       }
       Solver::Options options;
       options.max_num_iterations = 25;

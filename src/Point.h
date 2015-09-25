@@ -5,7 +5,8 @@
 
 //TODO Point a piu dimensioni
 
-template <class T> class Point
+template <class T>
+class Point
 {
     private:
         T x;
