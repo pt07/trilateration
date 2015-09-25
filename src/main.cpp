@@ -1,3 +1,12 @@
+/*
+ * 2D Trilateration
+ *
+ * e.g.
+ * ./main -t 5.2 5.3 -b 1.2 2.2 -b 9.9 10 -b 0 8 -b 2 3 -b 6 7 -b 10 1 -b 0 15 -d 1
+ */
+
+
+
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 
@@ -18,21 +27,58 @@ using ceres::Solver;
 using ceres::Solve;
 
 
-// A templated cost functor that implements the residual r = 10 -
-// x. The method operator() is templated so that we can then use an
-// automatic differentiation wrapper around it to generate its
-// derivatives.
-//struct CostFunctor {
-//  template <typename T> bool operator()(const T* const x, T* residual) const {
-//    residual[0] = T(10.0) - x[0];
-//    return true;
-//  }
+//TODO provare a fare la classe
+
+//template <class T>
+//class MyCostFunctor {
+
+//    public:
+//        //default constructor
+//        MyCostFunctor(): beacon(Point<T>()), measure(T()) {}
+
+//        MyCostFunctor(Point<T> beacon_, T measure_): beacon(beacon_), measure(measure_) {}
+
+//        void init (const Point<T> beacon_, const T measure_){
+//            beacon = beacon_;
+//            measure = measure_;
+//        }
+
+//        bool operator()(const T* const x , T* residual) const {
+//            residual[0] = sqrt( pow(x[0]-beacon.getX(), 2) + pow(x[1]-beacon.getY(), 2)) - measure;
+//            return true;
+//        }
+
+//    private:
+//        Point<T> beacon;
+//        T measure;
+
 //};
+
+
+struct MeasurementResidual {
+
+    MeasurementResidual(double xi_, double yi_, double mi_)
+        : xi(xi_), yi(yi_), mi(mi_) {}
+
+    template <typename T>
+    bool operator()(const T* const x, const T* const y, T* residual) const {
+        residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
+        return true;
+    }
+
+    private:
+        const double xi;
+        const double yi;
+        const double mi;
+};
+
+
+
 
 int main(int argc, char** argv) {
     Point<double> target;
 
-    double std_dev = 1.0;
+    double std_dev = 0.1;
     vector< Point<double> > beacon;
 
 
@@ -60,7 +106,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    //TODO controllo numero di beacon
+    //TODO controllo numero di beacons inseriti (minimo 3?)
 
     if( !valid_input ){
         cout << "Input is not valid\n";
@@ -80,46 +126,52 @@ int main(int argc, char** argv) {
 
     for (int i=0; i<beacon.size(); ++i){
         double dist = target.distanceTo(beacon[i]);
-
-
         double noise = distribution(generator);
 
         measures.push_back(dist + noise);
-
-
 
         cout << "Beacon " << i << ": (" << beacon[i].getX() << ", "
              << beacon[i].getY() << ")\t | distance: " << dist << "\t--> " << dist + noise
              << "\tnoise=" << noise << endl;
     }
-    cout << endl;
+    cout << "------------------------------------------------------------------\n\n";
+
+    google::InitGoogleLogging(argv[0]);
 
 
+    // The variable to solve for with its initial value. It will be
+    // mutated in place by the solver.
+    //const double initial_x[] = {0, 0};
+    //double x[] = {initial_x[0], initial_x[1]};
 
-//  google::InitGoogleLogging(argv[0]);
+    //TODO vedere se riesco ad usare l'oggetto point o almeno un vettore di double
+    double x = 0.0;
+    double y = 0.0;
 
-//  // The variable to solve for with its initial value. It will be
-//  // mutated in place by the solver.
-//  double x = 0.5;
-//  const double initial_x = x;
+    // Build the problem.
+    Problem problem;
 
-//  // Build the problem.
-//  Problem problem;
 
-//  // Set up the only cost function (also known as residual). This uses
-//  // auto-differentiation to obtain the derivative (jacobian).
-//  CostFunction* cost_function =
-//      new AutoDiffCostFunction<CostFunctor, 1, 1>(new CostFunctor);
-//  problem.AddResidualBlock(cost_function, NULL, &x);
+    for (int i = 0; i < beacon.size(); ++i) {
+        problem.AddResidualBlock(
+            new AutoDiffCostFunction<MeasurementResidual, 1, 1, 1>(
+                new MeasurementResidual(beacon[i].getX(), beacon[i].getY(), measures[i])),
+            NULL,
+            &x, &y);
+      }
+      Solver::Options options;
+      options.max_num_iterations = 25;
+      options.linear_solver_type = ceres::DENSE_QR;
+      options.minimizer_progress_to_stdout = true;
+      Solver::Summary summary;
+      Solve(options, &problem, &summary);
+      std::cout << summary.BriefReport() << "\n";
+      std::cout << "Initial x: " << 0.0 << " y: " << 0.0 << "\n";
+      std::cout << "Final   x: " << x << " y: " << y << "\n";
 
-//  // Run the solver!
-//  Solver::Options options;
-//  options.minimizer_progress_to_stdout = true;
-//  Solver::Summary summary;
-//  Solve(options, &problem, &summary);
+      cout << "The estimated position is far " << target.distanceTo(Point<double>(x, y)) << " from the real position\n";
 
-//  std::cout << summary.BriefReport() << "\n";
-//  std::cout << "x : " << initial_x
-//            << " -> " << x << "\n";
-  return 0;
+
+      return 0;
+
 }

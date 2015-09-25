@@ -16,6 +16,7 @@ template <class T> class Point
     public:
         Point();
         Point(T x, T y);
+//        Point(const Point<T>& p);
         virtual ~Point();
 
         T getX() { return x; }

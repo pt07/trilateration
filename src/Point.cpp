@@ -8,7 +8,7 @@ template <class T> Point<T>::~Point() {}
 
 template <class T> T Point<T>::distanceTo(Point<T> p){
 
-    T sum = (x - p.getX()) * (x - p.getX()) + (y - p.getY()) * (y - p.getY());
+    T sum = pow(x - p.getX(), 2) + pow(y - p.getY(), 2);
 
     return sqrt(sum);
 }
