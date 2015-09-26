@@ -6,7 +6,7 @@
 
 //TODO Point a piu dimensioni
 
-template <class T>
+template <class T, int n>
 class Point
 {
     private:
@@ -26,7 +26,7 @@ class Point
         void setX(T x_) { x = x_; }
         void setY(T y_) { y = y_; }
 
-        T distanceTo(Point<T> p);
+        T distanceTo(Point<T, n> p);
 
         inline std::string toString() const {
             std::ostringstream s;

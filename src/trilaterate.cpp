@@ -29,6 +29,7 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
+const int DIM = 2; //dimension: 2D or 3D?
 
 //TODO
 //TODO  come faccio a usare il template qui dentro?
@@ -42,8 +43,8 @@ class MyCostFunctor
             : xi(xi_), yi(yi_), mi(mi_) {}
 
         template <typename T>
-        bool operator()(const T* const x, const T* const y, T* residual) const {
-            residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
+        bool operator()(const T* const pos, T* residual) const {
+            residual[0] = sqrt( pow(pos[0]-T(xi), 2) + pow(pos[1]-T(yi), 2)) - T(mi);
             return true;
         }
 
@@ -74,10 +75,11 @@ class MyCostFunctor
 
 
 int main(int argc, char** argv) {
-    Point<double> target;
+
+    Point<double, DIM> target;
 
     double std_dev = 0.1;
-    vector< Point<double> > beacon;
+    vector< Point<double, DIM> > beacon;
 
 
     // Parse arguments
@@ -93,7 +95,7 @@ int main(int argc, char** argv) {
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
 
-            beacon.push_back(Point<double>(x, y));
+            beacon.push_back(Point<double, DIM>(x, y));
         } else if ((strcmp (argv[i], "--target") == 0) || (strcmp (argv[i], "-t") == 0)){
 
            target.setX( atof(argv[++i]) );
@@ -135,22 +137,23 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
-    //const double initial_x[] = {0, 0};
-    //double x[] = {initial_x[0], initial_x[1]};
 
     //TODO vedere se riesco ad usare l'oggetto point o almeno un vettore di double
-    double x = 0.0;
-    double y = 0.0;
+    //vector<double> pos(DIM, 0.0);
+//    double x = 0.0;
+//    double y = 0.0;
+
+    double x[] = {0.0, 0.0};
 
     // Build the problem.
     Problem problem;
 
 
     for (int i = 0; i < beacon.size(); ++i) {
-        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 1, 1>(
+        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, DIM>(
                     new MyCostFunctor(beacon[i].getX(), beacon[i].getY(), measures[i]));
 
-        problem.AddResidualBlock(cost_f, NULL, &x, &y);
+        problem.AddResidualBlock(cost_f, NULL, x);
     }
     Solver::Options options;
     options.max_num_iterations = 25;
@@ -159,10 +162,14 @@ int main(int argc, char** argv) {
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     std::cout << summary.BriefReport() << "\n";
-    std::cout << "Initial x: " << 0.0 << " y: " << 0.0 << "\n";
-    std::cout << "Final   x: " << x << " y: " << y << "\n";
+    std::cout << "Initial position: all 0\n";
+    std::cout << "Final position: ";
+    for (int i = 0; i < DIM-1; ++i) {
+        cout << x[i] << " , ";
+    }
+    cout << x[DIM-1] << endl;
 
-    cout << "The estimated position is far " << target.distanceTo(Point<double>(x, y)) << " from the real position\n";
+    cout << "The estimated position is far " << target.distanceTo(Point<double, DIM>(x[0], x[1])) << " from the real position\n";
 
 
     return 0;
