@@ -3,7 +3,9 @@
 
 #include <math.h>   //sqrt
 #include <sstream>  //ostringstream
+#include <vector>
 
+//TODO usare vector<T> e rifare getter
 
 template <class T>
 class Point
@@ -20,13 +22,14 @@ class Point
         Point(T x, T y, T z);
         virtual ~Point();
 
-        T getX() { return x; }
-        T getY() { return y; }
-        T getZ() { return z; }
+        inline T getX() { return x; }
+        inline T getY() { return y; }
+        inline T getZ() { return z; }
+        inline std::vector<T> getXYZ() { return {x, y, z}; }
 
-        void setX(T x_) { x = x_; }
-        void setY(T y_) { y = y_; }
-        void setZ(T z_) { z = z_; }
+        inline void setX(T x_) { x = x_; }
+        inline void setY(T y_) { y = y_; }
+        inline void setZ(T z_) { z = z_; }
 
         T distanceTo(Point<T> p);
 

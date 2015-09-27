@@ -132,26 +132,22 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
+    double pos[] = {0.0, 0.0, 0.0};
 
-    //TODO vedere se riesco ad usare l'oggetto point o almeno un vettore di double
-    //vector<double> pos(DIM, 0.0);
-//    double x = 0.0;
-//    double y = 0.0;
-
-    double x[] = {0.0, 0.0};
 
     // Build the problem.
     Problem problem;
 
 
     for (int i = 0; i < beacon.size(); ++i) {
-        //beacon i
-        vector<double> bi = {beacon[i].getX(), beacon[i].getY(), 0.0};
+
+        //vector<double> bi = {beacon[i].getX(), beacon[i].getY(), beacon[i].getZ()}; //beacon i
+        vector<double> bi = beacon[i].getXYZ();
 
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, DIM>(
                     new MyCostFunctor(bi, measures[i]));
 
-        problem.AddResidualBlock(cost_f, NULL, x);
+        problem.AddResidualBlock(cost_f, NULL, pos);
     }
     Solver::Options options;
     options.max_num_iterations = 25;
@@ -159,15 +155,13 @@ int main(int argc, char** argv) {
     options.minimizer_progress_to_stdout = true;
     Solver::Summary summary;
     Solve(options, &problem, &summary);
-    std::cout << summary.BriefReport() << "\n";
-    std::cout << "Initial position: origin\n";
-    std::cout << "Final position: ";
-    for (int i = 0; i < DIM-1; ++i) {
-        cout << x[i] << " , ";
-    }
-    cout << x[DIM-1] << endl;
+    cout << summary.BriefReport() << "\n";
+    cout << "Initial position: " << Point<double>().toString() << endl;
 
-    cout << "The estimated position is far " << target.distanceTo(Point<double>(x[0], x[1])) << " from the real position\n";
+    Point<double>target_est(pos[0], pos[1], pos[2]);
+
+    cout << "Final position: " << target_est.toString() << endl;
+    cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n";
 
 
     return 0;
