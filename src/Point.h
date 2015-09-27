@@ -11,9 +11,7 @@ template <class T>
 class Point
 {
     private:
-        T x;
-        T y;
-        T z;
+        std::vector<T> coords;
 
     protected:
 
@@ -22,20 +20,22 @@ class Point
         Point(T x, T y, T z);
         virtual ~Point();
 
-        inline T getX() { return x; }
-        inline T getY() { return y; }
-        inline T getZ() { return z; }
-        inline std::vector<T> getXYZ() { return {x, y, z}; }
+        inline T getX() { return coords[0]; }
+        inline T getY() { return coords[1]; }
+        inline T getZ() { return coords[2]; }
 
-        inline void setX(T x_) { x = x_; }
-        inline void setY(T y_) { y = y_; }
-        inline void setZ(T z_) { z = z_; }
+        inline void setCoords(T x, T y, T z){ coords = {x, y, z}; }
+        inline std::vector<T> getCoords() { return coords; }
+
+        inline void setX(T x) { coords[0] = x; }
+        inline void setY(T y) { coords[1] = y; }
+        inline void setZ(T z) { coords[2] = z; }
 
         T distanceTo(Point<T> p);
 
         inline std::string toString() const {
             std::ostringstream s;
-            s << "(" << x << ", " << y << ", " << z << ")";
+            s << "(" << coords[0] << ", " << coords[1] << ", " << coords[2] << ")";
             return s.str();
         }
 

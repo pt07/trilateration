@@ -29,7 +29,6 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
-const int DIM = 2; //dimension: 2D or 3D?
 
 //TODO
 //TODO  come faccio a usare il template qui dentro?
@@ -63,19 +62,16 @@ class MyCostFunctor
         const double mi;
 };
 
-// TODO to ask DIFFERENCES?
 //struct MeasurementResidual {....};
-
-
+// TODO to ask: DIFFERENCES?
 
 
 int main(int argc, char** argv) {
 
     Point<double> target;
-
-    double std_dev = 0.1;
     vector< Point<double> > beacon;
 
+    double std_dev = 1;
 
     // Parse arguments
     // TODO check if input is well formed
@@ -89,21 +85,28 @@ int main(int argc, char** argv) {
 
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
+            double z = 0;
+            if(i+1<argc)
+                z = atof(argv[i + 1]); //if is text, it goes to 0 by default
 
-            beacon.push_back(Point<double>(x, y));
+            beacon.push_back(Point<double>(x, y, z));
+
         } else if ((strcmp (argv[i], "--target") == 0) || (strcmp (argv[i], "-t") == 0)){
 
-           target.setX( atof(argv[++i]) );
-           target.setY( atof(argv[++i]) );
+            double x = atof(argv[++i]);
+            double y = atof(argv[++i]);
+            double z = 0;
+            if(i+1<argc)
+                z = atof(argv[i + 1]); //if is text, it goes to 0 by default
 
-
-           valid_input = true;
+            target.setCoords(x, y, z);
+            valid_input = true;
         }
     }
 
     if( !valid_input || beacon.size()<2){
         cout << "Input is not valid\n";
-        cout << "Set the position of the target with '-t x y' and at least 2 beacons with '-b x y'\n";
+        cout << "Set the position of the target with '-t x y (z)' and at least 2 beacons with '-b x y (z)'\n";
         return -1;
     }
 
@@ -132,7 +135,7 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
-    double pos[] = {0.0, 0.0, 0.0};
+    double est_coords[] = {0.0, 0.0, 0.0};
 
 
     // Build the problem.
@@ -140,14 +143,12 @@ int main(int argc, char** argv) {
 
 
     for (int i = 0; i < beacon.size(); ++i) {
+        vector<double> bi = beacon[i].getCoords();
 
-        //vector<double> bi = {beacon[i].getX(), beacon[i].getY(), beacon[i].getZ()}; //beacon i
-        vector<double> bi = beacon[i].getXYZ();
-
-        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, DIM>(
+        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3>(
                     new MyCostFunctor(bi, measures[i]));
 
-        problem.AddResidualBlock(cost_f, NULL, pos);
+        problem.AddResidualBlock(cost_f, NULL, est_coords);
     }
     Solver::Options options;
     options.max_num_iterations = 25;
@@ -158,10 +159,10 @@ int main(int argc, char** argv) {
     cout << summary.BriefReport() << "\n";
     cout << "Initial position: " << Point<double>().toString() << endl;
 
-    Point<double>target_est(pos[0], pos[1], pos[2]);
+    Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
 
     cout << "Final position: " << target_est.toString() << endl;
-    cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n";
+    cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
 
 
     return 0;
