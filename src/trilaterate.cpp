@@ -39,51 +39,42 @@ class MyCostFunctor
 {
     public:
 
-        MyCostFunctor(double bi_[], double mi_)
-            : /*asd(bi_),*/ xi(bi_[0]), yi(bi_[1]), mi(mi_) {
+        MyCostFunctor(vector<double> bi_, double mi_)
+            : bi(bi_), mi(mi_) {
 
         }
 
         template <typename T>
         bool operator()(const T* const pos, T* residual) const {
-            residual[0] = sqrt( pow(pos[0]-T(xi), 2) + pow(pos[1]-T(yi), 2)) - T(mi);
+
+            T square_sum = T(0);
+
+            for (int i = 0; i < bi.size(); ++i) {
+                square_sum += pow(pos[i]-T(bi[i]), 2);
+            }
+
+            residual[0] = sqrt( square_sum ) - T(mi);
             return true;
         }
 
     private:
-        //const vector<double> bi;
+        const vector<double> bi;
 
-        const double xi;
-        const double yi;
         const double mi;
 };
 
-//struct MeasurementResidual {
-
-//    MeasurementResidual(double xi_, double yi_, double mi_)
-//        : xi(xi_), yi(yi_), mi(mi_) {}
-
-//    template <typename T>
-//    bool operator()(const T* const x, const T* const y, T* residual) const {
-//        residual[0] = sqrt( pow(x[0]-T(xi), 2) + pow(y[0]-T(yi), 2)) - T(mi);
-//        return true;
-//    }
-
-//    private:
-//        const double xi;
-//        const double yi;
-//        const double mi;
-//};
+// TODO to ask DIFFERENCES?
+//struct MeasurementResidual {....};
 
 
 
 
 int main(int argc, char** argv) {
 
-    Point<double, DIM> target;
+    Point<double> target;
 
     double std_dev = 0.1;
-    vector< Point<double, DIM> > beacon;
+    vector< Point<double> > beacon;
 
 
     // Parse arguments
@@ -99,7 +90,7 @@ int main(int argc, char** argv) {
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
 
-            beacon.push_back(Point<double, DIM>(x, y));
+            beacon.push_back(Point<double>(x, y));
         } else if ((strcmp (argv[i], "--target") == 0) || (strcmp (argv[i], "-t") == 0)){
 
            target.setX( atof(argv[++i]) );
@@ -154,9 +145,8 @@ int main(int argc, char** argv) {
 
 
     for (int i = 0; i < beacon.size(); ++i) {
-        double bi[] = {beacon[i].getX(), beacon[i].getY()};
-
-        cout << "FUORI\t bi : " << bi << "\t bi [0]: " << bi[0] << endl;
+        //beacon i
+        vector<double> bi = {beacon[i].getX(), beacon[i].getY(), 0.0};
 
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, DIM>(
                     new MyCostFunctor(bi, measures[i]));
@@ -170,14 +160,14 @@ int main(int argc, char** argv) {
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     std::cout << summary.BriefReport() << "\n";
-    std::cout << "Initial position: all 0\n";
+    std::cout << "Initial position: origin\n";
     std::cout << "Final position: ";
     for (int i = 0; i < DIM-1; ++i) {
         cout << x[i] << " , ";
     }
     cout << x[DIM-1] << endl;
 
-    cout << "The estimated position is far " << target.distanceTo(Point<double, DIM>(x[0], x[1])) << " from the real position\n";
+    cout << "The estimated position is far " << target.distanceTo(Point<double>(x[0], x[1])) << " from the real position\n";
 
 
     return 0;

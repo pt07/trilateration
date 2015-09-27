@@ -4,33 +4,35 @@
 #include <math.h>   //sqrt
 #include <sstream>  //ostringstream
 
-//TODO Point a piu dimensioni
 
-template <class T, int n>
+template <class T>
 class Point
 {
     private:
         T x;
         T y;
+        T z;
 
     protected:
 
     public:
         Point();
-        Point(T x, T y);
+        Point(T x, T y, T z);
         virtual ~Point();
 
         T getX() { return x; }
         T getY() { return y; }
+        T getZ() { return z; }
 
         void setX(T x_) { x = x_; }
         void setY(T y_) { y = y_; }
+        void setZ(T z_) { z = z_; }
 
-        T distanceTo(Point<T, n> p);
+        T distanceTo(Point<T> p);
 
         inline std::string toString() const {
             std::ostringstream s;
-            s << "(" << x << ", " << y << ")";
+            s << "(" << x << ", " << y << ", " << z << ")";
             return s.str();
         }
 
