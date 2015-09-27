@@ -39,8 +39,10 @@ class MyCostFunctor
 {
     public:
 
-        MyCostFunctor(double xi_, double yi_, double mi_)
-            : xi(xi_), yi(yi_), mi(mi_) {}
+        MyCostFunctor(double bi_[], double mi_)
+            : /*asd(bi_),*/ xi(bi_[0]), yi(bi_[1]), mi(mi_) {
+
+        }
 
         template <typename T>
         bool operator()(const T* const pos, T* residual) const {
@@ -49,6 +51,8 @@ class MyCostFunctor
         }
 
     private:
+        //const vector<double> bi;
+
         const double xi;
         const double yi;
         const double mi;
@@ -150,8 +154,12 @@ int main(int argc, char** argv) {
 
 
     for (int i = 0; i < beacon.size(); ++i) {
+        double bi[] = {beacon[i].getX(), beacon[i].getY()};
+
+        cout << "FUORI\t bi : " << bi << "\t bi [0]: " << bi[0] << endl;
+
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, DIM>(
-                    new MyCostFunctor(beacon[i].getX(), beacon[i].getY(), measures[i]));
+                    new MyCostFunctor(bi, measures[i]));
 
         problem.AddResidualBlock(cost_f, NULL, x);
     }
