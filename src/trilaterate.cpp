@@ -1,13 +1,9 @@
 /*
- * 2D Trilateration
+ * Trilateration
  *
  * e.g.
- * ./trilaterate -t 5.2 5.3 -b 1.2 2.2 -b 9.9 10 -b 0 8 -b 2 3 -b 6 7 -b 10 1 -b 0 15 -d 1
- */
+ *  ./trilaterate -t 5.2 5.3 -b 1.2 2.2 -b 9.9 10 -b 0 8 -b 2 3 -b 6 7 -b 10 1 -b 0 15 -d 1
 
-/*
- * prova
- * ora fondo il branch con il master
  */
 
 #include "ceres/ceres.h"
@@ -39,9 +35,7 @@ class MyCostFunctor
     public:
 
         MyCostFunctor(vector<double> bi_, double mi_)
-            : bi(bi_), mi(mi_) {
-
-        }
+            : bi(bi_), mi(mi_) {}
 
         template <typename T>
         bool operator()(const T* const pos, T* residual) const {
@@ -157,11 +151,11 @@ int main(int argc, char** argv) {
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     cout << summary.BriefReport() << "\n";
-    cout << "Initial position: " << Point<double>().toString() << endl;
+    cout << "Real position: " << target.toString() << endl;
 
     Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
 
-    cout << "Final position: " << target_est.toString() << endl;
+    cout << "Estimated position: " << target_est.toString() << endl;
     cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
 
 

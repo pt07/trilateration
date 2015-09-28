@@ -21,3 +21,9 @@ T Point<T>::distanceTo(Point<T> p){
     return sqrt(sum);
 }
 
+template <class T>
+std::string Point<T>::toString() const {
+    std::ostringstream s;
+    s << "(" << coords[0] << ", " << coords[1] << ", " << coords[2] << ")";
+    return s.str();
+}
