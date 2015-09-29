@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(2DTrilateration)
+project(trilateration)
 
 find_package(Ceres REQUIRED)
 include_directories(${CERES_INCLUDE_DIRS})
@@ -17,7 +17,6 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
-
 
 
 

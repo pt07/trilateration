@@ -25,6 +25,7 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
+using ceres::Covariance;
 
 //TODO
 //TODO  come faccio a usare il template qui dentro?
@@ -158,6 +159,28 @@ int main(int argc, char** argv) {
     cout << "Estimated position: " << target_est.toString() << endl;
     cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
 
+    if(beacon.size() < 3){
+        cout << "Minimum 3 beacon are needed for the calculation of covariance matrix\n";
+    } else {
+        Covariance::Options cov_opt;
+        Covariance covariance(cov_opt);
+
+        vector<pair<const double*, const double*> > covariance_blocks;
+        covariance_blocks.push_back(make_pair(est_coords, est_coords));
+
+        CHECK(covariance.Compute(covariance_blocks, &problem));
+
+        double covariance_xx[3 * 3];
+        covariance.GetCovarianceBlock(est_coords, est_coords, covariance_xx);
+
+        cout << "Covariance Matrix:\n";
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                cout << covariance_xx[3*i + j] << ";  ";
+            }
+            cout << "\n";
+        }
+    }
 
     return 0;
 
