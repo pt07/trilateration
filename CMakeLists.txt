@@ -21,7 +21,9 @@ include_directories(${CERES_INCLUDE_DIRS})
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
 # Build
-add_executable(trilaterate src/trilaterate.cpp)
+add_executable(trilaterate src/trilaterate.cpp src/Point.h)#point.h is not needed, it's only to import automatically in qt creator
+add_executable(trilaterate2 src/trilaterate2.cpp src/Point.h)
 
 # Link
 target_link_libraries(trilaterate ${CERES_LIBRARIES})
+target_link_libraries(trilaterate2 ${CERES_LIBRARIES})

@@ -1,6 +1,6 @@
 /*
  * Trilateration
- *
+ * trilaterate
  * e.g.
  *  ./trilaterate -t 10 10 3 -b 2 4 100 -b 8 30 100 -b 20 10 100
  */
@@ -26,17 +26,19 @@ using ceres::Solve;
 
 using ceres::Covariance;
 
+const double LIGHT_VELOCITY = 3e8; // m/s
+
 
 class MyCostFunctor{
 
     public:
 
-        MyCostFunctor(vector<double> bi_, double mi_)
-            : bi(bi_), mi(mi_) {}
+        MyCostFunctor(vector<double> bi_, double ti_, double vel_)
+            : bi(bi_), ti(ti_), vel(vel_) {}
 
         //minimize (a-b^2)^2 instead of (sqrt(a)-b)^2
         template <typename T>
-        bool operator()(const T* const pos, T* residual) const {
+        bool operator()(const T* const pos, const T* const bias, T* residual) const {
 
             T square_sum = T(0);
 
@@ -44,7 +46,8 @@ class MyCostFunctor{
                 square_sum += pow(pos[i]-T(bi[i]), 2);
             }
 
-            residual[0] = square_sum - pow(T(mi), 2);
+            // TODO check correctness of the formula!!!!
+            residual[0] = square_sum - pow(vel*(ti - bias[0]), 2) ;
 
             return true;
         }
@@ -52,8 +55,13 @@ class MyCostFunctor{
 
     private:
         const vector<double> bi;
-        const double mi;
+        const double ti;
+        const double vel;
 };
+
+
+
+
 
 
 int main(int argc, char** argv) {
@@ -61,7 +69,10 @@ int main(int argc, char** argv) {
     Point<double> target;
     vector< Point<double> > beacon;
 
-    double std_dev = 0.1;
+    double velocity = LIGHT_VELOCITY;
+    double bias = 2e-7; //bias of the target's clock in seconds
+    double std_dev = 1e-8;
+
 
     // Parse arguments
     // TODO check if input is well formed
@@ -70,6 +81,10 @@ int main(int argc, char** argv) {
         if ((strcmp (argv[i], "--dev") == 0) || (strcmp (argv[i], "-d") == 0)){
 
             std_dev = atof(argv[++i]);
+
+        } else if (strcmp (argv[i], "--bias") == 0){
+
+            bias = atof(argv[++i]);
 
         } else if ((strcmp (argv[i], "--beacon") == 0) || (strcmp (argv[i], "-b") == 0)){
 
@@ -101,22 +116,26 @@ int main(int argc, char** argv) {
     }
 
     cout << "Standard deviation = " << std_dev << endl;
-    cout << "Target is in " <<  target.toString() << endl;
+    cout << "Target is in " <<  target.toString() << " and have a time bias of " << bias << endl;
 
-    vector< double > measures; // distance between target and beacon + gaussian noise
+
+    vector< double > time_measures; // time between target and beacon + target_bias + gaussian noise
 
     default_random_engine generator(time(NULL));
     normal_distribution<double> distribution(0, std_dev);
 
 
     for (int i=0; i<beacon.size(); ++i){
-        double dist = target.distanceTo(beacon[i]);
+        double time = target.distanceTo(beacon[i]) / velocity;
         double noise = distribution(generator);
 
-        measures.push_back(dist + noise);
+        time_measures.push_back(time + bias + noise);
 
-        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t| distance(" << dist
-             << ") + noise (" << noise << ")\t= " << dist + noise << endl;
+        cout << "Beacon " << i << ": " << beacon[i].toString()
+             << "\t | time(" << time
+             << ") + bias (" << bias
+             << ") + noise (" << noise
+             << ")\t= " << time + bias + noise << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
 
@@ -125,22 +144,24 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
-    Point<double> initial_guess(1000.0, 1000.0, -80.0);
+    Point<double> initial_guess(0.0, 0.0, 0.0);
     double est_coords[] = { initial_guess.getX(), initial_guess.getY(), initial_guess.getZ()};
+    double est_bias = 1e-8;
 
 
     // Build the problem.
     Problem problem;
 
-
     for (int i = 0; i < beacon.size(); ++i) {
         vector<double> bi = beacon[i].getCoords();
 
-        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3>(
-                    new MyCostFunctor(bi, measures[i]));
+        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3, 1>(
+                    new MyCostFunctor(bi, time_measures[i], velocity));
 
-        problem.AddResidualBlock(cost_f, NULL, est_coords);
+        problem.AddResidualBlock(cost_f, NULL, est_coords, &est_bias);
     }
+
+
     Solver::Options options;
     options.max_num_iterations = 25;
     options.linear_solver_type = ceres::DENSE_QR;
@@ -150,8 +171,12 @@ int main(int argc, char** argv) {
     cout << summary.BriefReport() << "\n\n";
 
 
+
+
     cout << "Initial guess: " << initial_guess.toString() << endl;
     cout << "Real position: " << target.toString() << endl;
+    cout << "Real bias: " << bias << endl;
+    cout << "Estimated bias: " << est_bias << endl;
 
     Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
     cout << "Estimated position: " << target_est.toString() << endl;
@@ -159,31 +184,11 @@ int main(int argc, char** argv) {
 
 
 
-    /*
-     * TODO check correctness of this matrix
-     */
-    if(beacon.size() < 3){
-        cout << "Minimum 3 beacon are needed for the calculation of covariance matrix\n";
-    } else {
-        Covariance::Options cov_opt;
-        Covariance covariance(cov_opt);
 
-        vector<pair<const double*, const double*> > covariance_blocks;
-        covariance_blocks.push_back(make_pair(est_coords, est_coords));
 
-        CHECK(covariance.Compute(covariance_blocks, &problem));
 
-        double covariance_xx[3 * 3];
-        covariance.GetCovarianceBlock(est_coords, est_coords, covariance_xx);
 
-        cout << "Covariance Matrix:\n";
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                cout << covariance_xx[3*i + j] << ";  ";
-            }
-            cout << "\n";
-        }
-    }
+
 
     return 0;
 
