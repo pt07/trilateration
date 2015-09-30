@@ -15,7 +15,7 @@
 #include <cstdlib>      //atof
 #include <random>       //gaussian random number
 
-#include "Point.cpp" //TODO sarebbe da importare il .h
+#include "Point.h" //TODO sarebbe da importare il .h
 
 using namespace std;
 

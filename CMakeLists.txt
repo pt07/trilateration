@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-
 project(trilateration)
-
-find_package(Ceres REQUIRED)
-include_directories(${CERES_INCLUDE_DIRS})
-
 
 #to activate c++11
 include(CheckCXXCompilerFlag)
@@ -18,14 +13,15 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+# external libs
+find_package(Ceres REQUIRED)
+include_directories(${CERES_INCLUDE_DIRS})
 
-
+# Settings
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-# libraries
-add_library(Point src/Point.cpp)
-
-# main
+# Build
 add_executable(trilaterate src/trilaterate.cpp)
-target_link_libraries(trilaterate ${CERES_LIBRARIES} Point)
+
+# Link
+target_link_libraries(trilaterate ${CERES_LIBRARIES})
