@@ -27,7 +27,6 @@ using ceres::Solve;
 using ceres::Covariance;
 
 
-
 class MyCostFunctor{
 
     public:
@@ -35,6 +34,7 @@ class MyCostFunctor{
         MyCostFunctor(vector<double> bi_, double mi_)
             : bi(bi_), mi(mi_) {}
 
+        //minimize (a-b^2)^2 instead of (sqrt(a)-b)^2
         template <typename T>
         bool operator()(const T* const pos, T* residual) const {
 
@@ -44,16 +44,7 @@ class MyCostFunctor{
                 square_sum += pow(pos[i]-T(bi[i]), 2);
             }
 
-            /*
-             * To avoid a bug:
-             * sqrt(T(0)) = [0 ; -nan -nan -nan] instead of [0 ; 0 0 0]
-             * and then ceres can't solve correctly the optimization
-             */
-            if (square_sum == T(0)){
-                residual[0] = T(-mi);
-            } else {
-                residual[0] = sqrt( square_sum ) - T(mi);
-            }
+            residual[0] = square_sum - T(mi) * T(mi);
 
             return true;
         }
@@ -124,8 +115,8 @@ int main(int argc, char** argv) {
 
         measures.push_back(dist + noise);
 
-        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t | distance(" << dist
-             << ") + noise (" << noise << ") = " <<  dist + noise << endl;
+        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t| distance(" << dist
+             << ") + noise (" << noise << ")\t= " << dist + noise << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
 
@@ -134,7 +125,8 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
-    double est_coords[] = {0.0, 0.0, 0.0};
+    Point<double> initial_guess(1000.0, 1000.0, -80.0);
+    double est_coords[] = { initial_guess.getX(), initial_guess.getY(), initial_guess.getZ()};
 
 
     // Build the problem.
@@ -155,14 +147,21 @@ int main(int argc, char** argv) {
     options.minimizer_progress_to_stdout = true;
     Solver::Summary summary;
     Solve(options, &problem, &summary);
-    cout << summary.BriefReport() << "\n";
+    cout << summary.BriefReport() << "\n\n";
+
+
+    cout << "Initial guess: " << initial_guess.toString() << endl;
     cout << "Real position: " << target.toString() << endl;
 
     Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
-
     cout << "Estimated position: " << target_est.toString() << endl;
     cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
 
+
+
+    /*
+     * TODO check correctness of this matrix
+     */
     if(beacon.size() < 3){
         cout << "Minimum 3 beacon are needed for the calculation of covariance matrix\n";
     } else {
