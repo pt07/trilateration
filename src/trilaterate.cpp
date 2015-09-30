@@ -2,8 +2,7 @@
  * Trilateration
  *
  * e.g.
- *  ./trilaterate -t 5.2 5.3 -b 1.2 2.2 -b 9.9 10 -b 0 8 -b 2 3 -b 6 7 -b 10 1 -b 0 15 -d 1
-
+ *  ./trilaterate -t 10 10 3 -b 2 4 100 -b 8 30 100 -b 20 10 100
  */
 
 #include "ceres/ceres.h"
@@ -15,7 +14,7 @@
 #include <cstdlib>      //atof
 #include <random>       //gaussian random number
 
-#include "Point.h" //TODO sarebbe da importare il .h
+#include "Point.h"
 
 using namespace std;
 
@@ -27,12 +26,10 @@ using ceres::Solve;
 
 using ceres::Covariance;
 
-//TODO
-//TODO  come faccio a usare il template qui dentro?
-//TODO  nel senso, tenere le variabili private T e non double
-//template <class T>
-class MyCostFunctor
-{
+
+
+class MyCostFunctor{
+
     public:
 
         MyCostFunctor(vector<double> bi_, double mi_)
@@ -47,18 +44,25 @@ class MyCostFunctor
                 square_sum += pow(pos[i]-T(bi[i]), 2);
             }
 
-            residual[0] = sqrt( square_sum ) - T(mi);
+            /*
+             * To avoid a bug:
+             * sqrt(T(0)) = [0 ; -nan -nan -nan] instead of [0 ; 0 0 0]
+             * and then ceres can't solve correctly the optimization
+             */
+            if (square_sum == T(0)){
+                residual[0] = T(-mi);
+            } else {
+                residual[0] = sqrt( square_sum ) - T(mi);
+            }
+
             return true;
         }
 
+
     private:
         const vector<double> bi;
-
         const double mi;
 };
-
-//struct MeasurementResidual {....};
-// TODO to ask: DIFFERENCES?
 
 
 int main(int argc, char** argv) {
@@ -66,7 +70,7 @@ int main(int argc, char** argv) {
     Point<double> target;
     vector< Point<double> > beacon;
 
-    double std_dev = 1;
+    double std_dev = 0.1;
 
     // Parse arguments
     // TODO check if input is well formed
@@ -120,8 +124,8 @@ int main(int argc, char** argv) {
 
         measures.push_back(dist + noise);
 
-        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t | distance: " << dist
-             << "\t--> " << dist + noise << "\tnoise=" << noise << endl;
+        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t | distance(" << dist
+             << ") + noise (" << noise << ") = " <<  dist + noise << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
 
