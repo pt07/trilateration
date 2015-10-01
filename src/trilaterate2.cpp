@@ -1,8 +1,12 @@
 /*
  * Trilateration
- * trilaterate
+ *
+ * Uses time measurement instead of spacial.
+ * Target has a time bias.
+ * There is gaussian noise on measurements.
+ *
  * e.g.
- *  ./trilaterate -t 10 10 3 -b 2 4 100 -b 8 30 100 -b 20 10 100
+ * ./trilaterate2 -t 50 -50 8 -b 1000 1000 1000 -b 1000 -1000 1000 -b -1000 -1000 1000 -b -1000 1000 1000 -b 70 98 123 -b -44 -66 -77
  */
 
 #include "ceres/ceres.h"
@@ -46,7 +50,6 @@ class MyCostFunctor{
                 square_sum += pow(pos[i]-T(bi[i]), 2);
             }
 
-            // TODO check correctness of the formula!!!!
             residual[0] = square_sum - pow(vel*(ti - bias[0]), 2) ;
 
             return true;
@@ -71,7 +74,7 @@ int main(int argc, char** argv) {
 
     double velocity = LIGHT_VELOCITY;
     double bias = 2e-7; //bias of the target's clock in seconds
-    double std_dev = 1e-8;
+    double std_dev = 1e-8; // std deviation of the gaussian white noise added to measuremens
 
 
     // Parse arguments
@@ -132,10 +135,10 @@ int main(int argc, char** argv) {
         time_measures.push_back(time + bias + noise);
 
         cout << "Beacon " << i << ": " << beacon[i].toString()
-             << "\t | time(" << time
+             << "\t | time (" << time
              << ") + bias (" << bias
              << ") + noise (" << noise
-             << ")\t= " << time + bias + noise << endl;
+             << ")\t= " << time + bias + noise << " seconds" << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
 
@@ -146,7 +149,7 @@ int main(int argc, char** argv) {
     // mutated in place by the solver.
     Point<double> initial_guess(0.0, 0.0, 0.0);
     double est_coords[] = { initial_guess.getX(), initial_guess.getY(), initial_guess.getZ()};
-    double est_bias = 1e-8;
+    double est_bias = 0;
 
 
     // Build the problem.
@@ -163,7 +166,7 @@ int main(int argc, char** argv) {
 
 
     Solver::Options options;
-    options.max_num_iterations = 25;
+    options.max_num_iterations = 250;
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = true;
     Solver::Summary summary;
@@ -172,22 +175,17 @@ int main(int argc, char** argv) {
 
 
 
+    Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
 
     cout << "Initial guess: " << initial_guess.toString() << endl;
-    cout << "Real position: " << target.toString() << endl;
-    cout << "Real bias: " << bias << endl;
-    cout << "Estimated bias: " << est_bias << endl;
 
-    Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
-    cout << "Estimated position: " << target_est.toString() << endl;
-    cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
+    cout << "BIAS:\t  real = " << bias
+         << "\n\t  estimated = " << est_bias
+         << "\n\t  ratio = " << est_bias/bias << endl;
 
-
-
-
-
-
-
+    cout << "POSITION: real: " << target.toString()
+         << "\n\t  estimated: " << target_est.toString()
+         << "\n\t  distance: " << target.distanceTo(target_est) << "\n\n";
 
 
     return 0;
