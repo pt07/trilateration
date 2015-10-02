@@ -145,9 +145,10 @@ int main(int argc, char** argv) {
         problem.AddResidualBlock(cost_f, NULL, est_coords);
     }
     Solver::Options options;
-    options.max_num_iterations = 25;
+    options.max_num_iterations = 250;
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = true;
+
     Solver::Summary summary;
     Solve(options, &problem, &summary);
     cout << summary.BriefReport() << "\n\n";
