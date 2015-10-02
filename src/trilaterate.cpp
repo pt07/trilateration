@@ -13,6 +13,7 @@
 #include <string.h>     //strcmp
 #include <cstdlib>      //atof
 #include <random>       //gaussian random number
+#include <math.h>   //sqrt
 
 #include "Point.h"
 
@@ -31,35 +32,37 @@ class MyCostFunctor{
 
     public:
 
-        MyCostFunctor(vector<double> bi_, double mi_)
-            : bi(bi_), mi(mi_) {}
+        MyCostFunctor(vector<double> sat_i_, double meas_i_)
+            : sat_i(sat_i_), meas_i(meas_i_) {}
 
-        //minimize (a-b^2)^2 instead of (sqrt(a)-b)^2
         template <typename T>
         bool operator()(const T* const pos, T* residual) const {
 
             T square_sum = T(0);
 
-            for (int i = 0; i < bi.size(); ++i) {
-                square_sum += pow(pos[i]-T(bi[i]), 2);
+            for (int i = 0; i < sat_i.size(); ++i) {
+                square_sum += pow(pos[i]-T(sat_i[i]), 2);
             }
 
-            residual[0] = square_sum - pow(T(mi), 2);
+            T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
+
+            //error = expected measurement - actual measurement
+            residual[0] = distance - T(meas_i);
 
             return true;
         }
 
 
     private:
-        const vector<double> bi;
-        const double mi;
+        const vector<double> sat_i;
+        const double meas_i;
 };
 
 
 int main(int argc, char** argv) {
 
-    Point<double> target;
-    vector< Point<double> > beacon;
+    Point<double> receiver;
+    vector< Point<double> > satellites;
 
     double std_dev = 0.1;
 
@@ -71,7 +74,7 @@ int main(int argc, char** argv) {
 
             std_dev = atof(argv[++i]);
 
-        } else if ((strcmp (argv[i], "--beacon") == 0) || (strcmp (argv[i], "-b") == 0)){
+        } else if ((strcmp (argv[i], "--satellite") == 0) || (strcmp (argv[i], "-s") == 0)){
 
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
@@ -79,9 +82,9 @@ int main(int argc, char** argv) {
             if(i+1<argc)
                 z = atof(argv[i + 1]); //if is text, it goes to 0 by default
 
-            beacon.push_back(Point<double>(x, y, z));
+            satellites.push_back(Point<double>(x, y, z));
 
-        } else if ((strcmp (argv[i], "--target") == 0) || (strcmp (argv[i], "-t") == 0)){
+        } else if ((strcmp (argv[i], "--receiver") == 0) || (strcmp (argv[i], "-r") == 0)){
 
             double x = atof(argv[++i]);
             double y = atof(argv[++i]);
@@ -89,33 +92,33 @@ int main(int argc, char** argv) {
             if(i+1<argc)
                 z = atof(argv[i + 1]); //if is text, it goes to 0 by default
 
-            target.setCoords(x, y, z);
+            receiver.setCoords(x, y, z);
             valid_input = true;
         }
     }
 
-    if( !valid_input || beacon.size()<2){
+    if( !valid_input || satellites.size()<2){
         cout << "Input is not valid\n";
-        cout << "Set the position of the target with '-t x y (z)' and at least 2 beacons with '-b x y (z)'\n";
+        cout << "Set the position of the receiver with '-r x y (z)' and at least 2 satellites with '-s x y (z)'\n";
         return -1;
     }
 
     cout << "Standard deviation = " << std_dev << endl;
-    cout << "Target is in " <<  target.toString() << endl;
+    cout << "Receiver is in " <<  receiver.toString() << endl;
 
-    vector< double > measures; // distance between target and beacon + gaussian noise
+    vector< double > measures; // distance between receiver and satellite + gaussian noise
 
     default_random_engine generator(time(NULL));
     normal_distribution<double> distribution(0, std_dev);
 
 
-    for (int i=0; i<beacon.size(); ++i){
-        double dist = target.distanceTo(beacon[i]);
+    for (int i=0; i<satellites.size(); ++i){
+        double dist = receiver.distanceTo(satellites[i]);
         double noise = distribution(generator);
 
         measures.push_back(dist + noise);
 
-        cout << "Beacon " << i << ": " << beacon[i].toString() << "\t| distance(" << dist
+        cout << "Satellite " << i << ": " << satellites[i].toString() << "\t| distance(" << dist
              << ") + noise (" << noise << ")\t= " << dist + noise << endl;
     }
     cout << "------------------------------------------------------------------\n\n";
@@ -125,7 +128,7 @@ int main(int argc, char** argv) {
 
     // The variable to solve for with its initial value. It will be
     // mutated in place by the solver.
-    Point<double> initial_guess(1000.0, 1000.0, -80.0);
+    Point<double> initial_guess(0, 0, 0);
     double est_coords[] = { initial_guess.getX(), initial_guess.getY(), initial_guess.getZ()};
 
 
@@ -133,11 +136,11 @@ int main(int argc, char** argv) {
     Problem problem;
 
 
-    for (int i = 0; i < beacon.size(); ++i) {
-        vector<double> bi = beacon[i].getCoords();
+    for (int i = 0; i < satellites.size(); ++i) {
+        vector<double> sat_i = satellites[i].getCoords();
 
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3>(
-                    new MyCostFunctor(bi, measures[i]));
+                    new MyCostFunctor(sat_i, measures[i]));
 
         problem.AddResidualBlock(cost_f, NULL, est_coords);
     }
@@ -151,19 +154,19 @@ int main(int argc, char** argv) {
 
 
     cout << "Initial guess: " << initial_guess.toString() << endl;
-    cout << "Real position: " << target.toString() << endl;
+    cout << "Real position: " << receiver.toString() << endl;
 
-    Point<double>target_est(est_coords[0], est_coords[1], est_coords[2]);
-    cout << "Estimated position: " << target_est.toString() << endl;
-    cout << "The estimated position is far " << target.distanceTo(target_est) << " from the real position\n\n";
+    Point<double>receiver_est(est_coords[0], est_coords[1], est_coords[2]);
+    cout << "Estimated position: " << receiver_est.toString() << endl;
+    cout << "The estimated position is far " << receiver.distanceTo(receiver_est) << " from the real position\n\n";
 
 
 
     /*
      * TODO check correctness of this matrix
      */
-    if(beacon.size() < 3){
-        cout << "Minimum 3 beacon are needed for the calculation of covariance matrix\n";
+    if(satellites.size() < 3){
+        cout << "Minimum 3 satellite are needed for the calculation of covariance matrix\n";
     } else {
         Covariance::Options cov_opt;
         Covariance covariance(cov_opt);
