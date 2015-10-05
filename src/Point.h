@@ -28,7 +28,7 @@ class Point
         inline void setY(T y) { coords[1] = y; }
         inline void setZ(T z) { coords[2] = z; }
 
-        T distanceTo(Point<T> p);
+        T distanceTo(Point<T> p) const;
 
         std::string toString() const;
        // TODO  void operator=(const Point &p);
@@ -55,7 +55,7 @@ template <class T>
 Point<T>::~Point() {}
 
 template <class T>
-T Point<T>::distanceTo(Point<T> p){
+T Point<T>::distanceTo(Point<T> p) const{
 
     T sum =   pow(coords[0] - p.getX(), 2)
             + pow(coords[1] - p.getY(), 2)
