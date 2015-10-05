@@ -15,12 +15,13 @@ class Point
     public:
         Point();
         Point(T x, T y, T z);
+        Point(const Point &p);
         virtual ~Point();
 
-        inline std::vector<T> getCoords() { return coords; }
-        inline T getX() { return coords[0]; }
-        inline T getY() { return coords[1]; }
-        inline T getZ() { return coords[2]; }
+        inline std::vector<T> getCoords() const { return coords; }
+        inline T getX() const { return coords[0]; }
+        inline T getY() const { return coords[1]; }
+        inline T getZ() const { return coords[2]; }
 
         inline void setCoords(T x, T y, T z){ coords = {x, y, z}; }
         inline void setX(T x) { coords[0] = x; }
@@ -30,6 +31,7 @@ class Point
         T distanceTo(Point<T> p);
 
         std::string toString() const;
+       // TODO  void operator=(const Point &p);
 
 };
 
@@ -43,6 +45,11 @@ Point<T>::Point()
 template <class T>
 Point<T>::Point(T x, T y, T z = T(0))
     : coords({x, y, z}) {}
+
+template <class T>
+Point<T>::Point(const Point &p)
+    : coords(p.getCoords())
+{}
 
 template <class T>
 Point<T>::~Point() {}
