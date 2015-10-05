@@ -13,6 +13,9 @@ else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+# Enable all warnings
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+
 # external libs
 find_package(Ceres REQUIRED)
 include_directories(${CERES_INCLUDE_DIRS})
@@ -20,10 +23,15 @@ include_directories(${CERES_INCLUDE_DIRS})
 # Settings
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
+# Libraries
+add_library(Trilateration src/Trilateration.cpp)
+
 # Build
 add_executable(trilaterate src/trilaterate.cpp src/Point.h)#point.h is not needed, it's only to import automatically in qt creator
 add_executable(trilaterate2 src/trilaterate2.cpp src/Point.h)
+add_executable(main src/main.cpp)
 
 # Link
 target_link_libraries(trilaterate ${CERES_LIBRARIES})
 target_link_libraries(trilaterate2 ${CERES_LIBRARIES})
+target_link_libraries(main ${CERES_LIBRARIES} Trilateration)

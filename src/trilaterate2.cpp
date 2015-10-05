@@ -31,7 +31,7 @@ using ceres::Solve;
 using ceres::Covariance;
 
 const double NANO = 1e-9;
-const double LIGHT_VELOCITY = 3e8; // m / s
+const double SPEED_OF_LIGHT = 3e8; // m / s
 
 
 class MyCostFunctor{
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 
     // Parameters
 
-    double velocity = LIGHT_VELOCITY;
+    double velocity = SPEED_OF_LIGHT;
     double bias = 100 * NANO; //bias of the receiver's clock in seconds
     //TODO with this values it works good. is std_dev too small?
     double std_dev = 1 * NANO; // std deviation of the gaussian white noise added to measuremens
