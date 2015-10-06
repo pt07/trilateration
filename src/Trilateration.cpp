@@ -1,11 +1,12 @@
 #include "Trilateration.h"
 
 Trilateration::Trilateration()
-    : receiver(Point<double>()),
-      initialBiasGuess(DEF_INITIAL_BIAS_GUESS),
-      initialCoordsGuess(DEF_INITIAL_COORDS_GUESS)
 {
-    std::cout << "costruttore!\n"; // std::cin.ignore();
+    std::cout << "Constructor!\n";
+
+    initialBiasGuess = DEF_INITIAL_BIAS_GUESS;
+    initialCoordsGuess = DEF_INITIAL_COORDS_GUESS;
+
 }
 
 Trilateration::~Trilateration()
@@ -14,7 +15,7 @@ Trilateration::~Trilateration()
     std::cout << "Destructor\n";
 }
 
-std::vector<double> Trilateration::simulateMeasurements(double bias, double noiseStdDev)
+std::vector<double> Trilateration::simulateMeasurements(const Point<double> &receiver, double bias, double noiseStdDev)
 {
     std::default_random_engine generator(time(NULL));
     std::normal_distribution<double> distribution(0, noiseStdDev);
@@ -22,7 +23,7 @@ std::vector<double> Trilateration::simulateMeasurements(double bias, double nois
     std::vector<double> v;
 
     for (size_t i=0; i<satellites.size(); ++i){
-        double time = receiver.distanceTo(satellites[i]) / SPEED_OF_LIGHT;
+        double time = receiver.distanceTo(satellites[i]);
         double noise = distribution(generator);
 
         v.push_back(time + bias + noise);
@@ -30,37 +31,140 @@ std::vector<double> Trilateration::simulateMeasurements(double bias, double nois
 
     return v;
 }
+double Trilateration::getEstimatedBias() const
+{
+    return estBias;
+}
+
+Point<double> Trilateration::getEstimatedCoords() const
+{
+    return Point<double>(estCoords[0], estCoords[1], estCoords[2]);
+}
 
 
 
-void Trilateration::compute(const std::vector<double> &measurements, Point<double> &est_pos, double &est_bias )
+void Trilateration::compute(const std::vector<double> &measurements)
 {
     std::cout << "CALCOLO\n";
-    est_pos = Point<double>(7, 8, 9);
-    est_bias = 1e-5;
+
+    /*
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * TODO
+     * TODOQUI
+     * per quache motivo, da quando ho aggiunto il receiver come parametro a compute
+     * ceres non converge più. capisci perchè
+     */
+//    estCoords[0] = 6;
+//    estCoords[1] = 6;
+//    estCoords[2] = 6;
+//    estBias = 3;
+
+    // Build the problem.
+    Problem problem;
+
+    std::cout << "-------------------\n"
+            << "satellites.size() " << satellites.size() <<  "\n"
+            ;
+
+    double tmp_coords[] = { 0, 0, 0};
+    double tmp_bias = 10e-9;
+
+
+    for (size_t i = 0; i < satellites.size(); ++i) {
+        std::vector<double> sat_i = satellites[i].getCoords();
+        std::cout << "sat_i  = (" << sat_i[0] << " " << sat_i[1] << " " << sat_i[2] <<  ")\n";
+        std::cout << "measurements[i] " << measurements[i] << "\n";
+
+
+
+        CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3, 1>(
+                    new MyCostFunctor(sat_i, measurements[i], SPEED_OF_LIGHT));
+
+        problem.AddResidualBlock(cost_f, NULL, tmp_coords, &tmp_bias);
+    }
+
+
+    Solver::Options options;
+    options.linear_solver_type = ceres::DENSE_QR;
+    options.minimizer_progress_to_stdout = true;
+
+    options.parameter_tolerance = 1e-12;
+    options.function_tolerance = 1e-12;
+    options.gradient_tolerance = 1e-12;
+    options.max_num_iterations = 20; // TODO 1000
+
+    Solver::Summary summary;
+    Solve(options, &problem, &summary);
+    std::cout << summary.BriefReport() << "\n\n";
+
+
+
+
+
+
+
+
+
+
+
+    estCoords[0] = tmp_coords[0];
+    estCoords[1] = tmp_coords[1];
+    estCoords[2] = tmp_coords[2];
+    estBias = tmp_bias;
+
+    std::cout << "---------  FINE  ----------\n";
     return;
 }
 
-void Trilateration::compute(double bias, double noiseStdDev, Point<double> &est_pos, double &est_bias )
+void Trilateration::compute(const Point<double> &receiver, double bias, double noiseStdDev)
 {
     std::cout << "Using simulated measurements!\n";
-    std::vector<double> measurements = simulateMeasurements(bias, noiseStdDev);
-    compute(measurements, est_pos, est_bias);
+    std::vector<double> measurements = simulateMeasurements(receiver, bias, noiseStdDev);
+    compute(measurements);
 }
 
 /*
  * Setter
  */
-void Trilateration::setReceiver(double x, double y, double z)
-{
-    setReceiver(Point<double>(x, y, z));
-}
-
-void Trilateration::setReceiver(const Point<double> &value)
-{
-    receiver = value;
-}
-
 void Trilateration::setSatellite(double x, double y, double z)
 {
     satellites.push_back(Point<double>(x, y, z));
@@ -76,22 +180,10 @@ void Trilateration::setInitialBiasGuess(double value)
     initialBiasGuess = value;
 }
 
-// Receive time measurements from the sensor
-void Trilateration::setTimeMeasurements(const std::vector<double> &value)
-{
-    timeMeasurements = value;
-}
-
-
 
 /*
  * Getter
  */
-Point<double> Trilateration::getReceiver() const
-{
-    return receiver;
-}
-
 Point<double> Trilateration::getSatellite(int i) const
 {
     //TODO decidi cosa tornare se index out of bound
@@ -116,9 +208,4 @@ double Trilateration::getInitialBiasGuess() const
 void Trilateration::setInitialCoordsGuess(const Point<double> &value)
 {
     initialCoordsGuess = value;
-}
-
-std::vector<double> Trilateration::getTimeMeasurements() const
-{
-    return timeMeasurements;
 }

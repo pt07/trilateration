@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     normal_distribution<double> distribution(0, std_dev);
 
 
-    for (int i=0; i<satellites.size(); ++i){
+    for (size_t i=0; i<satellites.size(); ++i){
         double dist = receiver.distanceTo(satellites[i]);
         double noise = distribution(generator);
 
@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
     Problem problem;
 
 
-    for (int i = 0; i < satellites.size(); ++i) {
+    for (size_t i = 0; i < satellites.size(); ++i) {
         vector<double> sat_i = satellites[i].getCoords();
 
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3>(
