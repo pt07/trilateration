@@ -11,7 +11,7 @@
 
 using namespace std;
 
-bool parseArgs(int argc, char** argv, Trilateration &tr, double &bias, double &std_dev, Point<double> &receiver);
+bool parseArgs(int argc, char** argv, Point<double> &receiver, vector<Point<double> > &satellites, double &bias, double &std_dev);
 
 // Default values
 const double DEF_BIAS = 100e-9;
@@ -22,22 +22,24 @@ int main(int argc, char** argv)
 {
 
     Trilateration *tr = new Trilateration();
+
     double bias = DEF_BIAS,
            std_dev = DEF_STD_DEV;
     Point<double> receiver;
+    vector<Point<double>> satellites;
 
-    if(!parseArgs(argc, argv, *tr, bias, std_dev, receiver))
+    if(!parseArgs(argc, argv, receiver, satellites, bias, std_dev))
     {
         cout << "Input is not valid\n";
         return -1;
     }
 
-    cout << "satellites " << tr->getSatellites().size() << endl;
-    cout << "receiver " << receiver.toString() << endl;
+    tr->setSatellites(satellites);
 
     google::InitGoogleLogging(argv[0]);
 
-    // the class will simulate measurements based on this bias and noise
+    // The class will simulate measurements based on this receiver position, bias and noise.
+    // If you want to use real measurements, call tr->compute(vector<double> &measurements);
     tr->compute(receiver, bias, std_dev);
 
     Point<double> receiver_est = tr->getEstimatedCoords();
@@ -61,7 +63,7 @@ int main(int argc, char** argv)
 
 
 
-bool parseArgs(int argc, char** argv, Trilateration &tr, double &bias, double &std_dev, Point<double> &receiver)
+bool parseArgs(int argc, char** argv, Point<double> &receiver, vector<Point<double>> &satellites, double &bias, double &std_dev)
 {
     bool receiver_setted = false;
     int n_satellites = 0;
@@ -81,7 +83,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, double &bias, double &s
             double y = atof(argv[++i]);
             double z = atof(argv[++i]);
 
-            tr.setSatellite(x, y, z);
+            satellites.push_back(Point<double>(x, y, z));
             ++n_satellites;
 
         } else if ((strcmp (argv[i], "--receiver") == 0) || (strcmp (argv[i], "-r") == 0)){

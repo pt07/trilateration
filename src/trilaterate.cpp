@@ -13,7 +13,7 @@
 #include <string.h>     //strcmp
 #include <cstdlib>      //atof
 #include <random>       //gaussian random number
-#include <math.h>   //sqrt
+#include <math.h>       //sqrt
 
 #include "Point.h"
 
