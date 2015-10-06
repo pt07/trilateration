@@ -9,29 +9,33 @@
 template <class T>
 class Point
 {
-    private:
-        std::vector<T> coords;
+private:
+    std::vector<T> coords;
 
-    public:
-        Point();
-        Point(T x, T y, T z);
-        Point(const Point &p);
-        virtual ~Point();
+public:
+    Point();
+    Point(T x, T y, T z);
+    Point(const Point &p);
+    virtual ~Point();
 
-        inline std::vector<T> getCoords() const { return coords; }
-        inline T getX() const { return coords[0]; }
-        inline T getY() const { return coords[1]; }
-        inline T getZ() const { return coords[2]; }
+    inline std::vector<T> getCoords() const { return coords; }
+    inline T getX() const { return coords[0]; }
+    inline T getY() const { return coords[1]; }
+    inline T getZ() const { return coords[2]; }
 
-        inline void setCoords(T x, T y, T z){ coords = {x, y, z}; }
-        inline void setX(T x) { coords[0] = x; }
-        inline void setY(T y) { coords[1] = y; }
-        inline void setZ(T z) { coords[2] = z; }
+    inline void setCoords(T x, T y, T z){ coords = {x, y, z}; }
+    inline void setX(T x) { coords[0] = x; }
+    inline void setY(T y) { coords[1] = y; }
+    inline void setZ(T z) { coords[2] = z; }
 
-        T distanceTo(Point<T> p) const;
+    T distanceTo(Point<T> p) const;
 
-        std::string toString() const;
-       // TODO  void operator=(const Point &p);
+    // TODO  void operator=(const Point &p);
+    Point<T> operator+(const Point<T> p);
+    Point<T> operator-();
+
+
+    std::string toString() const;
 
 };
 
@@ -62,6 +66,26 @@ T Point<T>::distanceTo(Point<T> p) const{
             + pow(coords[2] - p.getZ(), 2);
 
     return sqrt(sum);
+}
+
+template <class T>
+Point<T> Point<T>::operator+(const Point<T> p)
+{
+    return Point<T>({
+                        coords[0] + p.getX(),
+                        coords[1] + p.getY(),
+                        coords[2] + p.getZ()
+                    });
+}
+
+template <class T>
+Point<T> Point<T>::operator-()
+{
+    return Point<T>({
+                        -coords[0],
+                        -coords[1],
+                        -coords[2]
+                    });
 }
 
 template <class T>
