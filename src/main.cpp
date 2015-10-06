@@ -41,11 +41,10 @@ int main(int argc, char** argv)
     // The class will simulate measurements based on this receiver position, bias and noise.
     // If you want to use real measurements, call tr->compute(vector<double> &measurements);
     tr->compute(receiver, bias, std_dev);
+    cout << tr->report();
 
-    Point<double> receiver_est = tr->getEstimatedCoords();
     double est_bias = tr->getEstimatedBias();
-
-    cout << "Initial guess: position" << tr->getInitialCoordsGuess().toString() << "\tbias " << tr->getInitialBiasGuess() << endl;
+    Point<double>receiver_est = tr->getEstimatedCoords();
 
     cout << "BIAS:\t  real = " << bias
          << "\n\t  estimated = " << est_bias

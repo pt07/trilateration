@@ -17,7 +17,11 @@ Trilateration::~Trilateration()
 
 void Trilateration::compute(const std::vector<double> &measurements)
 {
-    std::cout << "----- INIZIO CALCOLO ------\n";
+    if(satellites.size() < 2){
+        rep << "Insert at least 2 satellites!\n";
+        return;
+    }
+
 
     // Build the problem.
     Problem problem;
@@ -25,10 +29,8 @@ void Trilateration::compute(const std::vector<double> &measurements)
 
     for (size_t i = 0; i < satellites.size(); ++i) {
         std::vector<double> sat_i = satellites[i].getCoords();
-        std::cout << "sat_i  = (" << sat_i[0] << " " << sat_i[1] << " " << sat_i[2] <<  ")\t";
-        std::cout << "measurements[i] " << measurements[i] << "\n";
-
-
+        rep << "sat_i  = (" << sat_i[0] << " " << sat_i[1] << " " << sat_i[2] <<  ")\t";
+        rep << "measurements[i] = " << measurements[i] << "\n";
 
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3, 1>(
                     new MyCostFunctor(sat_i, measurements[i], SPEED_OF_LIGHT));
@@ -48,15 +50,23 @@ void Trilateration::compute(const std::vector<double> &measurements)
 
     Solver::Summary summary;
     Solve(options, &problem, &summary);
-    std::cout << summary.BriefReport() << "\n";
+    rep << summary.BriefReport() << "\n";
 
-    std::cout << "---------  FINE  ----------\n\n";
+
+
+    rep << "Initial guess: position" << initialCoordsGuess.toString()
+        << "\tbias " << initialBiasGuess << std::endl;
+    rep << "Estimated POSITION: " << getEstimatedCoords().toString() << "\t";
+    rep << "Estimated BIAS:\t " << estBias << std::endl;
+
+    rep << "-------------------------\n\n";
+
     return;
 }
 
 void Trilateration::compute(const Point<double> &receiver, const double bias, const double noiseStdDev)
 {
-    std::cout << "Using simulated measurements!\n";
+    // Simulate measurements and computer on that
     std::vector<double> measurements = simulateMeasurements(receiver, bias, noiseStdDev);
     compute(measurements);
 }
@@ -68,11 +78,18 @@ std::vector<double> Trilateration::simulateMeasurements(const Point<double> &rec
 
     std::vector<double> v;
 
+    rep << "Using simulated measurements!\n";
     for (size_t i=0; i<satellites.size(); ++i){
         double time = receiver.distanceTo(satellites[i]) / SPEED_OF_LIGHT;
         double noise = distribution(generator);
 
         v.push_back(time + bias + noise);
+
+        rep << "--Satellite " << i << ": " << satellites[i].toString()
+            << "\t | time (" << time
+            << ") + bias (" << bias
+            << ") + noise (" << noise
+            << ")\t= " << time + bias + noise << " ns" << std::endl;
     }
 
     return v;
@@ -81,9 +98,7 @@ std::vector<double> Trilateration::simulateMeasurements(const Point<double> &rec
 
 
 
-/*
- * TODO stampa riassuntino classe
- */
+// get report of the execution
 std::string Trilateration::report()
 {
     return rep.str();

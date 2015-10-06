@@ -60,8 +60,10 @@ public:
 private:
     std::vector< Point<double> > satellites;
 
-    double initialBiasGuess;
+    double initialBiasGuess; // todo const
     Point<double> initialCoordsGuess;
+
+
 
     // Results
     double estCoords[3];

@@ -22,7 +22,9 @@ public:
          * con  expected measurement = distance / vel + bias[0]
          *      actual measurement   = m_i
          */
-        residual[0] = distance / vel + bias[0] - m_i;
+        //residual[0] = distance / vel + bias[0] - m_i;
+
+        residual[0] = distance + vel * (bias[0] - m_i);
 
         return true;
     }
