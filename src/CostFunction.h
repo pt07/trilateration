@@ -5,7 +5,7 @@
 class MyCostFunctor{
 
 public:
-    MyCostFunctor(std::vector<double> sat_i_, double m_i_, double vel_)
+    MyCostFunctor(const std::vector<double> &sat_i_, const double m_i_, const double vel_)
         : sat_i(sat_i_), m_i(m_i_), vel(vel_) {}
 
     template <typename T>
@@ -17,14 +17,10 @@ public:
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
 
-        /*
-         * error = expected measurement - actual measurement
-         * con  expected measurement = distance / vel + bias[0]
-         *      actual measurement   = m_i
-         */
-        //residual[0] = distance / vel + bias[0] - m_i;
-
-        residual[0] = distance + vel * (bias[0] - m_i);
+        //error = expected measurement - actual measurement
+        //with  expected measurement = distance / vel + bias[0]
+        //      actual measurement   = m_i
+        residual[0] = (distance / vel + bias[0] - m_i) * 10e9;
 
         return true;
     }

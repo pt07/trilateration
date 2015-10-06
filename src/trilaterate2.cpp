@@ -77,11 +77,6 @@ class MyCostFunctor{
 };
 
 
-
-//TODO option in ceres est
-//
-
-
 int main(int argc, char** argv) {
 
     // Parameters

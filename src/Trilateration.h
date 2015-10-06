@@ -1,7 +1,7 @@
 #ifndef TRILATERATION_H
 #define TRILATERATION_H
 
-//#include <iostream> // TODO forse puoi toglierla, ora è qui per il cout
+#include <iostream>
 #include <random>       //gaussian random number
 
 #include "ceres/ceres.h"
@@ -15,8 +15,6 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
-//using ceres::Covariance;
-
 class Trilateration
 {
 public:
@@ -27,12 +25,14 @@ public:
     Trilateration();
     ~Trilateration();
 
-    void compute(const std::vector<double> &measurements);
-    void compute(const Point<double> &receiver, const double bias, const double noiseStdDev);
+    bool computePosition(const std::vector<double> &measurements);
 
     // Get results
     double getEstimatedBias() const;
     Point<double> getEstimatedCoords() const;
+
+    // Only to simulate the measurements
+    std::vector<double> simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev);
 
     // Setter & Getter
     void setSatellite(double x, double y, double z);
@@ -48,29 +48,16 @@ public:
     void setInitialCoordsGuess(const Point<double> &value);
     Point<double> getInitialCoordsGuess() const;
 
-    // Only to simulate the measurements
-    void setBias(double value);
-    double getBias() const;
-    void setNoiseStdDev(double value);
-    double getNoiseStdDev() const;
-    std::vector<double> simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev);
-
-    std::string report();
 
 private:
     std::vector< Point<double> > satellites;
 
-    double initialBiasGuess; // todo const
+    double initialBiasGuess;
     Point<double> initialCoordsGuess;
-
-
 
     // Results
     double estCoords[3];
     double estBias;
-
-    std::ostringstream rep;
-
 };
 
 #endif // TRILATERATION_H

@@ -1,5 +1,5 @@
 /*
- * Trilateration
+ * Trilateration based on distance measurements
  *
  * e.g.
  *  ./trilaterate -t 10 10 3 -b 2 4 100 -b 8 30 100 -b 20 10 100

@@ -5,7 +5,7 @@
 #include <sstream>  //ostringstream
 #include <vector>
 
-//class header
+// Class header
 template <class T>
 class Point
 {
@@ -30,7 +30,6 @@ public:
 
     T distanceTo(Point<T> p) const;
 
-    // TODO  void operator=(const Point &p);
     Point<T> operator+(const Point<T> p);
     Point<T> operator-();
 
@@ -40,7 +39,7 @@ public:
 };
 
 
-// class implementation
+// Class implementation
 
 template <class T>
 Point<T>::Point()

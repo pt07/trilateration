@@ -1,6 +1,5 @@
 /*
- *
- *
+ * ./main -r 3 -3 2 -s 15 26 40 -s 1 -32 50 -s -60 -8 70 -s 24 73 56 -s -99 -66 708
  */
 #include <iostream>
 #include <string.h>     //strcmp
@@ -20,11 +19,11 @@ const double DEF_STD_DEV = 1e-9;
 
 int main(int argc, char** argv)
 {
+    google::InitGoogleLogging(argv[0]);
 
     Trilateration *tr = new Trilateration();
 
-    double bias = DEF_BIAS,
-           std_dev = DEF_STD_DEV;
+    double bias = DEF_BIAS, std_dev = DEF_STD_DEV;
     Point<double> receiver;
     vector<Point<double>> satellites;
 
@@ -35,33 +34,41 @@ int main(int argc, char** argv)
     }
 
     tr->setSatellites(satellites);
+    vector<double> measurements = tr->simulateMeasurements(receiver, bias, std_dev);
 
-    google::InitGoogleLogging(argv[0]);
+    if(!tr->computePosition(measurements))
+    {
+        cout << "Error while computing position\n";
+        return -1;
+    }
 
-    // The class will simulate measurements based on this receiver position, bias and noise.
-    // If you want to use real measurements, call tr->compute(vector<double> &measurements);
-    tr->compute(receiver, bias, std_dev);
-    cout << tr->report();
 
     double est_bias = tr->getEstimatedBias();
     Point<double>receiver_est = tr->getEstimatedCoords();
 
+    cout << "\nInitial guess: position" << tr->getInitialCoordsGuess().toString()
+            << " |\tbias = " << tr->getInitialBiasGuess()
+            << " |\tnoise std dev = " << std_dev << endl << endl;
+
     cout << "BIAS:\t  real = " << bias
          << "\n\t  estimated = " << est_bias
-         << "\n\t  ratio = " << est_bias/bias << endl;
+         << "\n\t  ratio = " << bias/est_bias << endl;
+
+    Point<double> diff = receiver + -receiver_est;
 
     cout << "POSITION: real: " << receiver.toString()
          << "\n\t  estimated: " << receiver_est.toString()
+         << "\n\t  difference: " << diff.toString()
          << "\n\t  distance: " << receiver.distanceTo(receiver_est) << "\n\n";
 
-
+    delete tr;
 
     return 0;
 
 }
 
 
-
+// Boost gives a nice args parser
 bool parseArgs(int argc, char** argv, Point<double> &receiver, vector<Point<double>> &satellites, double &bias, double &std_dev)
 {
     bool receiver_setted = false;

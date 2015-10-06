@@ -4,9 +4,10 @@ To solve trilateration Ceres-Solver is used to minimize the sum of the squares o
 
 USAGE:
 ./trilaterate
--t or --target double double double : the position of the target
--b or --beacon double double double : the position of a beacon
+-r or --receiver double double double : the position of the receiver
+-s or --satellite double double double : the position of a satellite
 -d or --dev double : the standard deviation of the gaussian white noise added to measurements
+-b or --bias : target's time bias
 
 e.g.
-./trilaterate -t 5.2 5.3 5 -b 1.2 2.2 6 -b 9.9 10 2 -b 0 8 4 -b 2 3 98 -b 6 7 6 -b 10 1 0 -d 1
+./main -r 3 -3 2 -s 15 26 40 -s 1 -32 50 -s -60 -8 70 -s 24 73 56 -s -99 -66 708

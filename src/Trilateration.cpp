@@ -2,38 +2,28 @@
 
 Trilateration::Trilateration()
 {
-    std::cout << "Constructor!\n";
-
     initialBiasGuess = DEF_INITIAL_BIAS_GUESS;
     initialCoordsGuess = DEF_INITIAL_COORDS_GUESS;
 
 }
 
-Trilateration::~Trilateration()
-{
-    //TODO is needed?
-    std::cout << "Destructor\n";
-}
+Trilateration::~Trilateration() { }
 
-void Trilateration::compute(const std::vector<double> &measurements)
+bool Trilateration::computePosition(const std::vector<double> &measurements)
 {
-    if(satellites.size() < 2){
-        rep << "Insert at least 2 satellites!\n";
-        return;
+    if((satellites.size() < 2) || (satellites.size() != measurements.size()))
+    {
+        std::cout << "Insert the same number of satellites and measurements, and at least 2!\n";
+        return false;
     }
-
 
     // Build the problem.
     Problem problem;
 
 
     for (size_t i = 0; i < satellites.size(); ++i) {
-        std::vector<double> sat_i = satellites[i].getCoords();
-        rep << "sat_i  = (" << sat_i[0] << " " << sat_i[1] << " " << sat_i[2] <<  ")\t";
-        rep << "measurements[i] = " << measurements[i] << "\n";
-
         CostFunction* cost_f = new AutoDiffCostFunction<MyCostFunctor, 1, 3, 1>(
-                    new MyCostFunctor(sat_i, measurements[i], SPEED_OF_LIGHT));
+                    new MyCostFunctor(satellites[i].getCoords(), measurements[i], SPEED_OF_LIGHT));
 
         problem.AddResidualBlock(cost_f, NULL, estCoords, &estBias);
     }
@@ -50,25 +40,9 @@ void Trilateration::compute(const std::vector<double> &measurements)
 
     Solver::Summary summary;
     Solve(options, &problem, &summary);
-    rep << summary.BriefReport() << "\n";
+    std::cout << summary.BriefReport() << "\n";
 
-
-
-    rep << "Initial guess: position" << initialCoordsGuess.toString()
-        << "\tbias " << initialBiasGuess << std::endl;
-    rep << "Estimated POSITION: " << getEstimatedCoords().toString() << "\t";
-    rep << "Estimated BIAS:\t " << estBias << std::endl;
-
-    rep << "-------------------------\n\n";
-
-    return;
-}
-
-void Trilateration::compute(const Point<double> &receiver, const double bias, const double noiseStdDev)
-{
-    // Simulate measurements and computer on that
-    std::vector<double> measurements = simulateMeasurements(receiver, bias, noiseStdDev);
-    compute(measurements);
+    return true;
 }
 
 std::vector<double> Trilateration::simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev)
@@ -78,32 +52,23 @@ std::vector<double> Trilateration::simulateMeasurements(const Point<double> &rec
 
     std::vector<double> v;
 
-    rep << "Using simulated measurements!\n";
+    std::cout << "Simulated measurements:\n";
     for (size_t i=0; i<satellites.size(); ++i){
         double time = receiver.distanceTo(satellites[i]) / SPEED_OF_LIGHT;
         double noise = distribution(generator);
 
         v.push_back(time + bias + noise);
 
-        rep << "--Satellite " << i << ": " << satellites[i].toString()
+        std::cout << "--Satellite " << i << ": " << satellites[i].toString()
             << "\t | time (" << time
             << ") + bias (" << bias
             << ") + noise (" << noise
             << ")\t= " << time + bias + noise << " ns" << std::endl;
     }
+    std::cout << "\n";
 
     return v;
 }
-
-
-
-
-// get report of the execution
-std::string Trilateration::report()
-{
-    return rep.str();
-}
-
 
 
 /*
