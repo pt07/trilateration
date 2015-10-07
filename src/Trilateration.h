@@ -20,19 +20,18 @@ class Trilateration
 public:
     const double DEF_INITIAL_BIAS_GUESS = 120e-9;
     const Point<double> DEF_INITIAL_COORDS_GUESS =  Point<double>(0, 0, 0);
-    const double SPEED_OF_LIGHT = 3e8; // m / s
 
     Trilateration();
     ~Trilateration();
 
-    bool computePosition(const std::vector<double> &measurements);
+    bool computePosition(const std::vector<double> &measurements, const double speed);
 
     // Get results
     double getEstimatedBias() const;
     Point<double> getEstimatedCoords() const;
 
     // Only to simulate the measurements
-    std::vector<double> simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev);
+    std::vector<double> simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev, const double speed);
 
     // Setter & Getter
     void setSatellite(double x, double y, double z);

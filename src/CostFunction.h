@@ -5,8 +5,8 @@
 class MyCostFunctor{
 
 public:
-    MyCostFunctor(const std::vector<double> &sat_i_, const double m_i_, const double vel_)
-        : sat_i(sat_i_), m_i(m_i_), vel(vel_) {}
+    MyCostFunctor(const std::vector<double> &sat_i_, const double m_i_, const double speed_)
+        : sat_i(sat_i_), m_i(m_i_), speed(speed_) {}
 
     template <typename T>
     bool operator()(const T* const pos, const T* const bias, T* residual) const {
@@ -20,7 +20,7 @@ public:
         //error = expected measurement - actual measurement
         //with  expected measurement = distance / vel + bias[0]
         //      actual measurement   = m_i
-        residual[0] = (distance / vel + bias[0] - m_i) * 10e9;
+        residual[0] = ( distance / speed + bias[0] - m_i ) * 10e9;
 
         return true;
     }
@@ -29,7 +29,7 @@ public:
 private:
     const std::vector<double> sat_i;
     const double m_i;
-    const double vel;
+    const double speed;
 };
 
 

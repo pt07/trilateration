@@ -15,6 +15,7 @@ bool parseArgs(int argc, char** argv, Point<double> &receiver, vector<Point<doub
 // Default values
 const double DEF_BIAS = 100e-9;
 const double DEF_STD_DEV = 1e-9;
+const double SPEED_OF_LIGHT = 3e8; // m / s
 
 
 int main(int argc, char** argv)
@@ -34,9 +35,9 @@ int main(int argc, char** argv)
     }
 
     tr->setSatellites(satellites);
-    vector<double> measurements = tr->simulateMeasurements(receiver, bias, std_dev);
+    vector<double> measurements = tr->simulateMeasurements(receiver, bias, std_dev, SPEED_OF_LIGHT);
 
-    if(!tr->computePosition(measurements))
+    if(!tr->computePosition(measurements, SPEED_OF_LIGHT))
     {
         cout << "Error while computing position\n";
         return -1;
