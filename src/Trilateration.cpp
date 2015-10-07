@@ -30,13 +30,19 @@ bool Trilateration::computePosition(const std::vector<double> &measurements, con
 
 
     Solver::Options options;
-    options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_progress_to_stdout = true;
 
-    options.parameter_tolerance = 1e-12;
+    options.minimizer_type = ceres::TRUST_REGION;
+    //options.minimizer_type = ceres::LINE_SEARCH; // TODO http://ceres-solver.org/nnls_solving.html#Solver::Options::linear_solver_type__LinearSolverType
+    //options.linear_solver_type = ceres::DENSE_QR;
+
     options.function_tolerance = 1e-12;
     options.gradient_tolerance = 1e-12;
+    options.parameter_tolerance = 1e-12;
     options.max_num_iterations = 1000;
+
+
+
 
     Solver::Summary summary;
     Solve(options, &problem, &summary);
