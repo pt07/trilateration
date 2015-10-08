@@ -117,6 +117,11 @@ Point<double> Trilateration::getSatellite(int i) const
     return satellites.at(i);
 }
 
+void Trilateration::deleteSatellite(int i)
+{
+    satellites.erase( satellites.begin() + i);
+}
+
 std::vector< Point<double> > Trilateration::getSatellites() const
 {
     return satellites;

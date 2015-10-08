@@ -38,6 +38,8 @@ public:
     void setSatellite(const Point<double> &value);
     Point<double> getSatellite(int i) const;
 
+    void deleteSatellite(int i);
+
     void setSatellites(const std::vector< Point<double> > vec);
     std::vector< Point<double> > getSatellites() const;
 
