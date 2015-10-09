@@ -5,6 +5,10 @@
 #include <sstream>  //ostringstream
 #include <vector>
 
+//TODO
+// se mettessi pubblico vector coords ed eliminassi tutti i setter/getter?
+
+
 // Class header
 template <class T>
 class Point
@@ -15,6 +19,7 @@ private:
 public:
     Point();
     Point(T x, T y, T z);
+	//TODO costruttore da array?
     Point(const Point &p);
     virtual ~Point();
 

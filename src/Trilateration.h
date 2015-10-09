@@ -6,7 +6,8 @@
 
 #include "ceres/ceres.h"
 
-#include "Point.h"
+#include "Point.h" // TODO meglio mettere nomi minuscoli ai file?
+#include "structs.h"
 #include "CostFunction.h"
 
 using ceres::AutoDiffCostFunction;
@@ -15,50 +16,29 @@ using ceres::Problem;
 using ceres::Solver;
 using ceres::Solve;
 
+
 class Trilateration
 {
 public:
-    const double DEF_INITIAL_BIAS_GUESS = 120e-9;
-    const Point<double> DEF_INITIAL_COORDS_GUESS =  Point<double>(0, 0, 0);
+	const Receiver DEF_INITIAL_REC_GUESS = {Point<double>(0, 0, 0), 120e-9};
 
     Trilateration();
     ~Trilateration();
 
-    bool computePosition(const std::vector<double> &measurements, const double speed);
+	Receiver computePosition(const std::vector<SatelliteMeasurement> &measurements, const double speed);
 
-    // Get results
-    double getEstimatedBias() const;
-    Point<double> getEstimatedCoords() const;
-
-    // Only to simulate the measurements
-    std::vector<double> simulateMeasurements(const Point<double> &receiver, const double bias, const double noiseStdDev, const double speed);
+	// Only to simulate the measurements
+	static std::vector<SatelliteMeasurement> simulateMeasurements(const Receiver &realReceiver,
+				const std::vector< Point<double> > &satellites, const double noiseStdDev, const double speed);
 
     // Setter & Getter
-    void setSatellite(double x, double y, double z);
-    void setSatellite(const Point<double> &value);
-    Point<double> getSatellite(int i) const;
-
-    void deleteSatellite(int i);
-
-    void setSatellites(const std::vector< Point<double> > vec);
-    std::vector< Point<double> > getSatellites() const;
-
-    void setInitialBiasGuess(double value);
-    double getInitialBiasGuess() const;
-
-    void setInitialCoordsGuess(const Point<double> &value);
-    Point<double> getInitialCoordsGuess() const;
-
+	Receiver getInitialReceiverGuess() const;
+	void setInitialReceiverGuess(const Receiver &value);
 
 private:
-    std::vector< Point<double> > satellites;
+	// Last known position
+	Receiver initialRecGuess;
 
-    double initialBiasGuess;
-    Point<double> initialCoordsGuess;
-
-    // Results
-    double estCoords[3];
-    double estBias;
 };
 
 #endif // TRILATERATION_H

@@ -31,7 +31,7 @@ SET(SRCS_TR_LIB
 add_executable(main src/main.cpp ${SRCS_TR_LIB})
 
 ## Link
-target_link_libraries(main ${CERES_LIBRARIES})# Trilateration)
+target_link_libraries(main ${CERES_LIBRARIES})
 
 
 

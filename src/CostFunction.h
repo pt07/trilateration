@@ -1,34 +1,33 @@
 #ifndef COSTFUNCTION_H
 #define COSTFUNCTION_H
 
+#include "structs.h"
 
 class MyCostFunctor{
 
 public:
-    MyCostFunctor(const std::vector<double> &sat_i_, const double m_i_, const double speed_)
-        : sat_i(sat_i_), m_i(m_i_), speed(speed_) {}
+
+	MyCostFunctor(const SatelliteMeasurement sm_, const double speed_)
+		: sm(sm_), speed(speed_) {}
 
     template <typename T>
     bool operator()(const T* const pos, const T* const bias, T* residual) const {
 
         T square_sum = T(0);
-        for (int i = 0; i < sat_i.size(); ++i) {
-            square_sum += pow(pos[i] - T(sat_i[i]) , 2);
+		for (int i = 0; i < sm.coords.getCoords().size(); ++i) {
+			square_sum += pow(pos[i] - T(sm.coords.getCoords()[i]) , 2);
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
 
         //error = expected measurement - actual measurement
-        //with  expected measurement = distance / vel + bias[0]
-        //      actual measurement   = m_i
-        residual[0] = ( distance / speed + bias[0] - m_i ) * 10e9;
+		residual[0] = ( distance / speed + bias[0] - sm.pseudorange ) * 10e9;
 
         return true;
     }
 
 
 private:
-    const std::vector<double> sat_i;
-    const double m_i;
+	SatelliteMeasurement sm;
     const double speed;
 };
 
