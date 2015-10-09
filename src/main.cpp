@@ -6,7 +6,7 @@
 
 #include "glog/logging.h"
 
-#include "Trilateration.cpp" // TODO toask: the same problem
+#include "Trilateration.h"
 
 using namespace std;
 
