@@ -1,7 +1,7 @@
 #include "Trilateration.h"
 
-Trilateration::Trilateration()
-	: initialRecGuess(DEF_INITIAL_REC_GUESS) { }
+Trilateration::Trilateration(bool verb)
+	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(verb) { }
 
 Trilateration::~Trilateration() { }
 
@@ -20,7 +20,7 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
     }
 
     Solver::Options options;
-    options.minimizer_progress_to_stdout = true;
+	options.minimizer_progress_to_stdout = verboseMode;
     options.minimizer_type = ceres::TRUST_REGION;
     //options.minimizer_type = ceres::LINE_SEARCH; // TODO http://ceres-solver.org/nnls_solving.html#Solver::Options::linear_solver_type__LinearSolverType
     //options.linear_solver_type = ceres::DENSE_QR;
@@ -32,7 +32,8 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
 
     Solver::Summary summary;
     Solve(options, &problem, &summary);
-    std::cout << summary.BriefReport() << "\n";
+
+	if(verboseMode) std::cout << summary.BriefReport() << "\n";
 
 	return {Point<double>(estCoords[0], estCoords[1], estCoords[2]), estBias};
 }
@@ -81,4 +82,9 @@ Receiver Trilateration::getInitialReceiverGuess() const
 void Trilateration::setInitialReceiverGuess(const Receiver &value)
 {
 	initialRecGuess = value;
+}
+
+void Trilateration::setVerboseMode(bool value)
+{
+	verboseMode = value;
 }
