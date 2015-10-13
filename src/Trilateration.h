@@ -22,7 +22,7 @@ class Trilateration
 public:
 	const Receiver DEF_INITIAL_REC_GUESS = {Point<double>(0, 0, 0), 120e-9};
 
-	Trilateration(bool verb = true);
+	Trilateration();
     ~Trilateration();
 
 	Receiver computePosition(const std::vector<SatelliteMeasurement> &measurements, const double speed);

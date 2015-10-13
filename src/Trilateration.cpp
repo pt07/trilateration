@@ -1,7 +1,7 @@
 #include "Trilateration.h"
 
-Trilateration::Trilateration(bool verb)
-	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(verb) { }
+Trilateration::Trilateration()
+	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(true) { }
 
 Trilateration::~Trilateration() { }
 
