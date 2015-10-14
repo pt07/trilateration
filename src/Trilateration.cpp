@@ -1,7 +1,7 @@
 #include "Trilateration.h"
 
 Trilateration::Trilateration()
-	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(true) { }
+	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(false) { }
 
 Trilateration::~Trilateration() { }
 
@@ -40,7 +40,7 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
 
 //static function
 std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Receiver &realReceiver,
-		const std::vector<Point<double> > &satellites, const double noiseStdDev, const double speed)
+		const std::vector<Point<double> > &satellites, const double noiseStdDev, const double speed, bool verbose)
 {
 	// Activate random
     std::default_random_engine generator(time(NULL));
@@ -48,7 +48,9 @@ std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Rece
 
 	std::vector<SatelliteMeasurement> v;
 
-    std::cout << "Simulated measurements:\n";
+	if(verbose)
+		std::cout << "Simulated measurements:\n";
+
 	for (size_t i=0; i<satellites.size(); ++i){
 		double time = realReceiver.coords.distanceTo(satellites.at(i)) / speed;
         double noise = distribution(generator);
@@ -57,14 +59,16 @@ std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Rece
 		meas.coords = satellites.at(i);
 		meas.pseudorange = time + realReceiver.bias + noise;
 
-		std::cout << "--Measure " << i << ": " <<  meas.toString()
-			<< "\t // = time (" << time
-			<< ") + bias (" << realReceiver.bias
-			<< ") + noise (" << noise << ")\n";
+		if(verbose)
+			std::cout << "--Measure " << i << ": " <<  meas.toString()
+					<< "\t // = time (" << time
+					<< ") + bias (" << realReceiver.bias
+					<< ") + noise (" << noise << ")\n";
 
 		v.push_back(meas);
     }
-    std::cout << "\n";
+	if(verbose)
+		std::cout << "\n";
 
     return v;
 }

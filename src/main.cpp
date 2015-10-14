@@ -36,13 +36,15 @@ int main(int argc, char** argv)
 
 	// Simulate measurements between target (known) and satellites
 	vector<SatelliteMeasurement> measurements =
-			Trilateration::simulateMeasurements(realReceiver, satellites, std_dev, SPEED_OF_LIGHT);
-
-	Trilateration *tr = new Trilateration();
-	Receiver estReceiver = tr->computePosition(measurements, SPEED_OF_LIGHT);
+			Trilateration::simulateMeasurements(realReceiver, satellites, std_dev, SPEED_OF_LIGHT, true);
 
 
-	cout << "\nInitial receiver guess:\t" << tr->getInitialReceiverGuess().toString()
+	Trilateration tr;
+	tr.setVerboseMode(true);
+
+	Receiver estReceiver = tr.computePosition(measurements, SPEED_OF_LIGHT);
+
+	cout << "\nInitial receiver guess:\t" << tr.getInitialReceiverGuess().toString()
 			<< "\t|\tnoise std dev = " << std_dev << endl << endl;
 
 	cout << "Real receiver:\t\t" << realReceiver.toString() << endl;
@@ -54,8 +56,6 @@ int main(int argc, char** argv)
 	cout << "Coords difference:\t" << diff.toString() << endl
 		 << "Coords distance:\t" << realReceiver.coords.distanceTo(estReceiver.coords) << "\t\t\t(0=good)" << "\n";
 	cout << "Bias ratio:\t\t" << realReceiver.bias/estReceiver.bias << "\t\t\t(1=good)" << endl << endl;
-
-	delete tr;
 
     return 0;
 

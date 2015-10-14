@@ -29,7 +29,7 @@ public:
 
 	// Only to simulate the measurements
 	static std::vector<SatelliteMeasurement> simulateMeasurements(const Receiver &realReceiver,
-				const std::vector< Point<double> > &satellites, const double noiseStdDev, const double speed);
+				const std::vector< Point<double> > &satellites, const double noiseStdDev, const double speed, bool verbose = false);
 
     // Setter & Getter
 	Receiver getInitialReceiverGuess() const;
