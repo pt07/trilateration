@@ -15,7 +15,7 @@ bool parseArgs(int argc, char** argv, Receiver &realReceiver, vector<Point<doubl
 
 // Default values
 const Receiver DEF_REAL_RECEIVER = {Point<double>(), 100e-9};
-const double DEF_STD_DEV = 1e-9;
+const double DEF_STD_DEV = 1e-10;
 
 const double SPEED_OF_LIGHT = 3e8; // m / s
 
@@ -34,13 +34,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-	// Simulate measurements between target (known) and satellites
-	vector<SatelliteMeasurement> measurements =
-			Trilateration::simulateMeasurements(realReceiver, satellites, std_dev, SPEED_OF_LIGHT, true);
-
-
 	Trilateration tr;
 	tr.setVerboseMode(true);
+
+	// Simulate measurements between target (known) and satellites
+	vector<SatelliteMeasurement> measurements = tr.simulateMeasurements(realReceiver,
+											satellites, std_dev, SPEED_OF_LIGHT, true);
 
 	Receiver estReceiver = tr.computePosition(measurements, SPEED_OF_LIGHT);
 

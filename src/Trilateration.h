@@ -20,7 +20,7 @@ using ceres::Solve;
 class Trilateration
 {
 public:
-	const Receiver DEF_INITIAL_REC_GUESS = {Point<double>(0, 0, 0), 120e-9};
+	const Receiver DEF_INITIAL_REC_GUESS = {Point<double>(0, 0, 0), 1e-6};
 
 	Trilateration();
     ~Trilateration();
@@ -28,8 +28,9 @@ public:
 	Receiver computePosition(const std::vector<SatelliteMeasurement> &measurements, const double speed);
 
 	// Only to simulate the measurements
-	static std::vector<SatelliteMeasurement> simulateMeasurements(const Receiver &realReceiver,
-				const std::vector< Point<double> > &satellites, const double noiseStdDev, const double speed, bool verbose = false);
+	std::vector<SatelliteMeasurement> simulateMeasurements(const Receiver &realReceiver,
+				const std::vector< Point<double> > &satellites, const double noiseStdDev,
+				const double speed, bool verbose = false);
 
     // Setter & Getter
 	Receiver getInitialReceiverGuess() const;
@@ -41,6 +42,7 @@ private:
 	// Last known position
 	Receiver initialRecGuess;
 	bool verboseMode;
+	std::default_random_engine generator;
 
 };
 

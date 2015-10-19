@@ -1,7 +1,10 @@
 #include "Trilateration.h"
 
 Trilateration::Trilateration()
-	: initialRecGuess(DEF_INITIAL_REC_GUESS), verboseMode(false) { }
+	: initialRecGuess(DEF_INITIAL_REC_GUESS),
+	  verboseMode(false),
+	  generator(time(NULL))
+{ }
 
 Trilateration::~Trilateration() { }
 
@@ -42,8 +45,6 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
 std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Receiver &realReceiver,
 		const std::vector<Point<double> > &satellites, const double noiseStdDev, const double speed, bool verbose)
 {
-	// Activate random
-    std::default_random_engine generator(time(NULL));
 	std::normal_distribution<double> distribution(0, noiseStdDev);
 
 	std::vector<SatelliteMeasurement> v;
