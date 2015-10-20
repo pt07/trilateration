@@ -1,4 +1,4 @@
-#include "Trilateration.h"
+#include "trilateration.h"
 
 Trilateration::Trilateration()
 	: initialRecGuess(DEF_INITIAL_REC_GUESS),

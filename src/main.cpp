@@ -7,7 +7,7 @@
 
 #include "glog/logging.h"
 
-#include "Trilateration.h"
+#include "trilateration.h"
 #include "structs.h"
 
 using namespace std;
