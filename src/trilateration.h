@@ -6,7 +6,7 @@
 
 #include "ceres/ceres.h"
 
-#include "point.h" // TODO meglio mettere nomi minuscoli ai file?
+#include "point.h"
 #include "structs.h"
 #include "cost_function.h"
 

@@ -10,14 +10,15 @@
 #include "trilateration.h"
 #include "structs.h"
 
-using namespace std;
+using std::vector;
+using std::cout;
+using std::endl;
 
 bool parseArgs(int argc, char** argv, Receiver &realReceiver, vector<Point<double> > &satellites, double &std_dev);
 
 // Default values
-const Receiver DEF_REAL_RECEIVER = {Point<double>(), 100e-9};
+const Receiver DEF_REAL_RECEIVER = {Point<double>(0, 0, 0), 100e-9};
 const double DEF_STD_DEV = 1e-10;
-
 const double SPEED_OF_LIGHT = 3e8; // m / s
 
 
@@ -51,10 +52,10 @@ int main(int argc, char** argv)
 	cout << "Estimated receiver:\t" << estReceiver.toString() << endl << endl;
 
 
-	Point<double> diff = realReceiver.coords + -estReceiver.coords;
+	Point<double> diff = realReceiver.pos + -estReceiver.pos;
 
 	cout << "Coords difference:\t" << diff.toString() << endl
-		 << "Coords distance:\t" << realReceiver.coords.distanceTo(estReceiver.coords) << "\t\t\t(0=good)" << "\n";
+		 << "Coords distance:\t" << realReceiver.pos.distanceTo(estReceiver.pos) << "\t\t\t(0=good)" << "\n";
 	cout << "Bias ratio:\t\t" << realReceiver.bias/estReceiver.bias << "\t\t\t(1=good)" << endl << endl;
 
     return 0;
@@ -92,7 +93,7 @@ bool parseArgs(int argc, char** argv, Receiver &realReceiver, vector<Point<doubl
 			double y = atof(argv[++i]);
 			double z = atof(argv[++i]);
 
-			realReceiver.coords = Point<double>(x, y, z);
+			realReceiver.pos = Point<double>(x, y, z);
 			receiver_setted = true;
 		}
 	}

@@ -5,33 +5,26 @@
 #include <sstream>  //ostringstream
 #include <vector>
 
-//TODO
-// se mettessi pubblico vector coords ed eliminassi tutti i setter/getter?
-
-
 // Class header
 template <class T>
 class Point
 {
-private:
-    std::vector<T> coords;
-
 public:
+	std::vector<T> coords;
+
     Point();
     Point(T x, T y, T z);
 	//TODO costruttore da array?
     Point(const Point &p);
     virtual ~Point();
 
-    inline std::vector<T> getCoords() const { return coords; }
-    inline T getX() const { return coords[0]; }
-    inline T getY() const { return coords[1]; }
-    inline T getZ() const { return coords[2]; }
+	inline T getX() const { return coords[0]; }
+	inline T getY() const { return coords[1]; }
+	inline T getZ() const { return coords[2]; }
 
-    inline void setCoords(T x, T y, T z){ coords = {x, y, z}; }
-    inline void setX(T x) { coords[0] = x; }
-    inline void setY(T y) { coords[1] = y; }
-    inline void setZ(T z) { coords[2] = z; }
+	inline void setX(T x) { coords[0] = x; }
+	inline void setY(T y) { coords[1] = y; }
+	inline void setZ(T z) { coords[2] = z; }
 
     T distanceTo(Point<T> p) const;
 
@@ -56,7 +49,7 @@ Point<T>::Point(T x, T y, T z = T(0))
 
 template <class T>
 Point<T>::Point(const Point &p)
-    : coords(p.getCoords())
+	: coords(p.coords)
 {}
 
 template <class T>
@@ -65,7 +58,7 @@ Point<T>::~Point() {}
 template <class T>
 T Point<T>::distanceTo(Point<T> p) const{
 
-    T sum =   pow(coords[0] - p.getX(), 2)
+	T sum =   pow(coords[0] - p.getX(), 2)
             + pow(coords[1] - p.getY(), 2)
             + pow(coords[2] - p.getZ(), 2);
 

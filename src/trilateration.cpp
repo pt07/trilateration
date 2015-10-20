@@ -53,11 +53,11 @@ std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Rece
 		std::cout << "Simulated measurements:\n";
 
 	for (size_t i=0; i<satellites.size(); ++i){
-		double time = realReceiver.coords.distanceTo(satellites.at(i)) / speed;
+		double time = realReceiver.pos.distanceTo(satellites.at(i)) / speed;
         double noise = distribution(generator);
 
 		SatelliteMeasurement meas;
-		meas.coords = satellites.at(i);
+		meas.pos = satellites.at(i);
 		meas.pseudorange = time + realReceiver.bias + noise;
 
 		if(verbose)

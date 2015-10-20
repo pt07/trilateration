@@ -5,13 +5,13 @@
 
 struct Receiver
 {
-	Point<double> coords;
+	Point<double> pos;
 	double bias;
 
 	std::string toString() const
 	{
 		std::ostringstream s;
-		s << "[" << coords.toString() << ", " << bias << "]";
+		s << "[" << pos.toString() << ", " << bias << "]";
 		return s.str();
 	}
 };
@@ -19,13 +19,13 @@ struct Receiver
 
 struct SatelliteMeasurement
 {
-	Point<double> coords;
+	Point<double> pos;
 	double pseudorange;
 
 	std::string toString() const
 	{
 		std::ostringstream s;
-		s << "[" << coords.toString() << ", " << pseudorange << "]";
+		s << "[" << pos.toString() << ", " << pseudorange << "]";
 		return s.str();
 	}
 };
