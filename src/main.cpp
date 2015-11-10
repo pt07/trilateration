@@ -62,10 +62,10 @@ int main(int argc, char** argv)
 	cout << "Estimated receiver:\t" << estReceiver.toString() << endl << endl;
 
 
-	Point<double> diff = realReceiver.coords + -estReceiver.coords;
+	Point<double> diff = realReceiver.pos + -estReceiver.pos;
 
 	cout << "Coords difference:\t" << diff.toString() << endl
-		 << "Coords distance:\t" << realReceiver.coords.distanceTo(estReceiver.coords) << "\t\t\t(0=good)" << "\n";
+		 << "Coords distance:\t" << realReceiver.pos.distanceTo(estReceiver.pos) << "\t\t\t(0=good)" << "\n";
 	cout << "Bias ratio:\t\t" << realReceiver.bias/estReceiver.bias << "\t\t\t(1=good)" << endl << endl;
 
     return 0;
@@ -97,7 +97,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 			double z = atof(argv[++i]);
 
 			SatelliteMeasurement sm;
-			sm.coords = Point<double>(x, y, z);
+			sm.pos = Point<double>(x, y, z);
 			sm.pseudorange = 0.0;
 
 			measurements.push_back(sm);
@@ -108,7 +108,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 			double y = atof(argv[++i]);
 			double z = atof(argv[++i]);
 
-			realReceiver.coords = Point<double>(x, y, z);
+			realReceiver.pos = Point<double>(x, y, z);
 			receiver_setted = true;
 		} else if ((strcmp (argv[i], "--file") == 0) || (strcmp (argv[i], "-f") == 0)){
 
@@ -135,7 +135,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 			vector<string> strs;
 			boost::split(strs, line, boost::is_any_of(" "));
 
-			realReceiver.coords = Point<double>(atof(strs[0].c_str()), atof(strs[1].c_str()), atof(strs[2].c_str()));
+			realReceiver.pos = Point<double>(atof(strs[0].c_str()), atof(strs[1].c_str()), atof(strs[2].c_str()));
 			realReceiver.bias = atof(strs[3].c_str());
 
 			cout << "READING FROM FILE " << path << endl;
@@ -151,7 +151,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 				boost::split(strs, line, boost::is_any_of(" "));
 
 				SatelliteMeasurement sm;
-				sm.coords = Point<double>(atof(strs[0].c_str()), atof(strs[1].c_str()), atof(strs[2].c_str()));
+				sm.pos = Point<double>(atof(strs[0].c_str()), atof(strs[1].c_str()), atof(strs[2].c_str()));
 				sm.pseudorange = atof(strs[3].c_str());
 
 				measurements.push_back(sm);

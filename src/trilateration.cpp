@@ -54,12 +54,12 @@ void Trilateration::simulateMeasurements(const Receiver &realReceiver,
 	for (size_t i=0; i<measurements.size(); ++i){
         double noise = distribution(generator);
 
-		measurements[i].pseudorange = realReceiver.coords.distanceTo(measurements[i].coords)
+		measurements[i].pseudorange = realReceiver.pos.distanceTo(measurements[i].pos)
 											+ speed * (realReceiver.bias + noise);
 
 		if(verbose)
 			std::cout << "--Measure " << i << ": " <<  measurements[i].toString()
-					<< "\t // = distance (" << realReceiver.coords.distanceTo(measurements.at(i).coords)
+					<< "\t // = distance (" << realReceiver.pos.distanceTo(measurements.at(i).pos)
 					<< ") + bias*speed (" << realReceiver.bias * speed
 					<< ") + noise*speed (" << noise * speed << ")\n";
 
