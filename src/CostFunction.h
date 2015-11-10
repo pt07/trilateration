@@ -19,8 +19,8 @@ public:
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
 
-        //error = expected measurement - actual measurement
-		residual[0] = ( distance / speed + bias[0] - sm.pseudorange ) * 10e9;
+		//    error = (expected measurement)     - (actual measurement)
+		residual[0] = (distance + bias[0]*speed) - (sm.pseudorange);
 
         return true;
     }

@@ -42,36 +42,31 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
 }
 
 //static function
-std::vector<SatelliteMeasurement> Trilateration::simulateMeasurements(const Receiver &realReceiver,
-		const std::vector<Point<double> > &satellites, const double noiseStdDev, const double speed, bool verbose)
+void Trilateration::simulateMeasurements(const Receiver &realReceiver,
+					std::vector<SatelliteMeasurement> &measurements,
+					const double noiseStdDev, const double speed, bool verbose)
 {
 	std::normal_distribution<double> distribution(0, noiseStdDev);
-
-	std::vector<SatelliteMeasurement> v;
 
 	if(verbose)
 		std::cout << "Simulated measurements:\n";
 
-	for (size_t i=0; i<satellites.size(); ++i){
-		double time = realReceiver.coords.distanceTo(satellites.at(i)) / speed;
+	for (size_t i=0; i<measurements.size(); ++i){
         double noise = distribution(generator);
 
-		SatelliteMeasurement meas;
-		meas.coords = satellites.at(i);
-		meas.pseudorange = time + realReceiver.bias + noise;
+		measurements[i].pseudorange = realReceiver.coords.distanceTo(measurements[i].coords)
+											+ speed * (realReceiver.bias + noise);
 
 		if(verbose)
-			std::cout << "--Measure " << i << ": " <<  meas.toString()
-					<< "\t // = time (" << time
-					<< ") + bias (" << realReceiver.bias
-					<< ") + noise (" << noise << ")\n";
+			std::cout << "--Measure " << i << ": " <<  measurements[i].toString()
+					<< "\t // = distance (" << realReceiver.coords.distanceTo(measurements.at(i).coords)
+					<< ") + bias*speed (" << realReceiver.bias * speed
+					<< ") + noise*speed (" << noise * speed << ")\n";
 
-		v.push_back(meas);
     }
 	if(verbose)
 		std::cout << "\n";
 
-    return v;
 }
 
 

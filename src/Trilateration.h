@@ -28,8 +28,8 @@ public:
 	Receiver computePosition(const std::vector<SatelliteMeasurement> &measurements, const double speed);
 
 	// Only to simulate the measurements
-	std::vector<SatelliteMeasurement> simulateMeasurements(const Receiver &realReceiver,
-				const std::vector< Point<double> > &satellites, const double noiseStdDev,
+	void simulateMeasurements(const Receiver &realReceiver,
+				std::vector<SatelliteMeasurement> &satellites, const double noiseStdDev,
 				const double speed, bool verbose = false);
 
     // Setter & Getter
