@@ -6,9 +6,9 @@
 
 #include "ceres/ceres.h"
 
-#include "Point.h" // TODO meglio mettere nomi minuscoli ai file?
+#include "point.h"
 #include "structs.h"
-#include "CostFunction.h"
+#include "cost_function.h"
 
 using ceres::AutoDiffCostFunction;
 using ceres::CostFunction;

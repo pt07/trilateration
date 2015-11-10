@@ -24,7 +24,7 @@ include_directories(${CERES_INCLUDE_DIRS})
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
 SET(SRCS_TR_LIB
-	src/Trilateration.cpp
+	src/trilateration.cpp
 )
 
 ## Build

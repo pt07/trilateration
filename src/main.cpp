@@ -8,7 +8,7 @@
 
 #include "glog/logging.h"
 
-#include "Trilateration.h"
+#include "trilateration.h"
 #include "structs.h"
 
 // to read file
@@ -23,9 +23,8 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 					vector<SatelliteMeasurement> &measurements, double &std_dev);
 
 // Default values
-const Receiver DEF_REAL_RECEIVER = {Point<double>(), 100e-9};
+const Receiver DEF_REAL_RECEIVER = {Point<double>(0, 0, 0), 100e-9};
 const double DEF_STD_DEV = 1e-10;
-
 const double SPEED_OF_LIGHT = 3e8; // m / s
 
 

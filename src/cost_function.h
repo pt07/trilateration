@@ -14,8 +14,8 @@ public:
     bool operator()(const T* const pos, const T* const bias, T* residual) const {
 
         T square_sum = T(0);
-		for (int i = 0; i < sm.coords.getCoords().size(); ++i) {
-			square_sum += pow(pos[i] - T(sm.coords.getCoords()[i]) , 2);
+		for (int i = 0; i < sm.coords.coords.size(); ++i) {
+			square_sum += pow(pos[i] - T(sm.coords.coords[i]) , 2);
         }
         T distance = (square_sum != T(0)) ? sqrt(square_sum) : T(0) ;
 
