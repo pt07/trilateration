@@ -4,6 +4,8 @@
 #include <math.h>   //sqrt
 #include <sstream>  //ostringstream
 #include <vector>
+#include <iomanip>	//set precision
+
 
 // Class header
 template <class T>
@@ -88,6 +90,7 @@ Point<T> Point<T>::operator-()
 template <class T>
 std::string Point<T>::toString() const {
     std::ostringstream s;
+	s << std::setprecision(12);
     s << "(" << coords[0] << ", " << coords[1] << ", " << coords[2] << ")";
     return s.str();
 }
