@@ -29,9 +29,11 @@ SET(SRCS_TR_LIB
 
 ## Build
 add_executable(main src/main.cpp ${SRCS_TR_LIB})
+add_executable(main_pr src/main_pr.cpp ${SRCS_TR_LIB})
 
 ## Link
 target_link_libraries(main ${CERES_LIBRARIES})
+target_link_libraries(main_pr ${CERES_LIBRARIES})
 
 
 
