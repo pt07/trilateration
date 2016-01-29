@@ -25,7 +25,6 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 // Default values
 const Receiver DEF_REAL_RECEIVER = {Point<double>(0, 0, 0), 100e-9};
 const double DEF_STD_DEV = 1e-10;
-const double SPEED_OF_LIGHT = 3e8; // m / s
 
 
 int main(int argc, char** argv)
@@ -53,7 +52,7 @@ int main(int argc, char** argv)
 	cout << endl;
 
 
-	Receiver estReceiver = tr.computePosition(measurements, SPEED_OF_LIGHT);
+	Receiver estReceiver = tr.computePosition(measurements);
 
 	cout << "\nInitial receiver guess:\t" << tr.getInitialReceiverGuess().toString()
 			<< "\t|\tnoise std dev = " << std_dev << endl << endl;
@@ -162,7 +161,7 @@ bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
 	} else {
 
 		// Simulate measurements between target (known) and satellites
-		tr.simulateMeasurements(realReceiver, measurements, std_dev, SPEED_OF_LIGHT, true);
+		tr.simulateMeasurements(realReceiver, measurements, std_dev, true);
 	}
 
 

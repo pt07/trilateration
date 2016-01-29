@@ -1,5 +1,5 @@
 /*
- * ./main -s -x_sat y_sat z_sat pr_sat -s.....
+ * ./main -s x_sat y_sat z_sat pr_sat -s.....
  */
 #include <iostream>
 #include <string.h>     //strcmp
@@ -17,13 +17,12 @@
 
 using namespace std;
 
-bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
+bool parseArgs(int argc, char** argv, Receiver &realReceiver,
 					vector<SatelliteMeasurement> &measurements, double &std_dev);
 
 // Default values
 //const Receiver DEF_REAL_RECEIVER = {Point<double>(0, 0, 0), 100e-9};
 const double DEF_STD_DEV = 1e-10;
-const double SPEED_OF_LIGHT = 3e8; // m / s
 
 
 int main(int argc, char** argv)
@@ -39,7 +38,7 @@ int main(int argc, char** argv)
 	Trilateration tr;
 	tr.setVerboseMode(true);
 
-	if(!parseArgs(argc, argv, tr, realReceiver, measurements, std_dev))
+	if(!parseArgs(argc, argv, realReceiver, measurements, std_dev))
     {
         cout << "Input is not valid\n";
         return -1;
@@ -52,7 +51,7 @@ int main(int argc, char** argv)
 	cout << endl;
 
 
-	Receiver estReceiver = tr.computePosition(measurements, SPEED_OF_LIGHT);
+	Receiver estReceiver = tr.computePosition(measurements);
 
 	cout << "\nInitial receiver guess:\t" << tr.getInitialReceiverGuess().toString()
 			<< "\t|\tnoise std dev = " << std_dev << endl << endl;
@@ -73,7 +72,7 @@ int main(int argc, char** argv)
 
 
 // Boost gives a nice args parser
-bool parseArgs(int argc, char** argv, Trilateration &tr, Receiver &realReceiver,
+bool parseArgs(int argc, char** argv, Receiver &realReceiver,
 			   vector<SatelliteMeasurement> &measurements, double &std_dev)
 {
 	string path;

@@ -44,7 +44,7 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
 //static function
 void Trilateration::simulateMeasurements(const Receiver &realReceiver,
 					std::vector<SatelliteMeasurement> &measurements,
-					const double noiseStdDev, const double speed, bool verbose)
+					const double noiseStdDev, bool verbose, const double speed)
 {
 	std::normal_distribution<double> distribution(0, noiseStdDev);
 
