@@ -1,5 +1,5 @@
 /*
- * ./main -s x_sat y_sat z_sat pr_sat -s.....
+ * ./main_pr -s x_sat y_sat z_sat pr_sat -s.....
  */
 #include <iostream>
 #include <string.h>     //strcmp
