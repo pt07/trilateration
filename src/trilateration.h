@@ -38,12 +38,12 @@ public:
 	Receiver getInitialReceiverGuess() const;
 	void setInitialReceiverGuess(const Receiver &value);
 
-	void setVerboseMode(bool value);
+	void setVerboseLevel(int value);
 
 private:
 	// Last known position
 	Receiver initialRecGuess;
-	bool verboseMode;
+	int verboseLevel;
 	std::default_random_engine generator;
 
 };

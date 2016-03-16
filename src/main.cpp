@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 	vector<SatelliteMeasurement> measurements;
 
 	Trilateration tr;
-	tr.setVerboseMode(true);
+	tr.setVerboseLevel(2);
 
 	if(!parseArgs(argc, argv, tr, realReceiver, measurements, std_dev))
     {
