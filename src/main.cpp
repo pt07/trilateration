@@ -45,14 +45,13 @@ int main(int argc, char** argv)
         return -1;
     }
 
-
 	for (size_t i = 0; i < measurements.size(); ++i) {
 		cout << "Measure " << i << ": " << measurements[i].toString() << endl;
 	}
 	cout << endl;
 
-
 	Receiver estReceiver = tr.computePosition(measurements);
+
 
 	cout << "\nInitial receiver guess:\t" << tr.getInitialReceiverGuess().toString()
 			<< "\t|\tnoise std dev = " << std_dev << endl << endl;
