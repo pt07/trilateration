@@ -23,7 +23,7 @@ Receiver Trilateration::computePosition(const std::vector<SatelliteMeasurement> 
     }
 
     Solver::Options options;
-	options.minimizer_progress_to_stdout = (verboseLevel>0);
+	options.minimizer_progress_to_stdout = (verboseLevel>=3);
     options.minimizer_type = ceres::TRUST_REGION;
     //options.minimizer_type = ceres::LINE_SEARCH; // TODO http://ceres-solver.org/nnls_solving.html#Solver::Options::linear_solver_type__LinearSolverType
     //options.linear_solver_type = ceres::DENSE_QR;
